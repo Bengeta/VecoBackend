@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -30,4 +30,4 @@ jobs:
     - name: Download SSH key
       run: wget -O k.key "$keylink";chmod 400 k.key
     - name: Upload artifacts
-      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" ./bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/ 
+      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" VecoBackend/bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/ 
