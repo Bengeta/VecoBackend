@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using VecoBackend.Interfaces;
+using VecoBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
+builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 
 var app = builder.Build();
 
