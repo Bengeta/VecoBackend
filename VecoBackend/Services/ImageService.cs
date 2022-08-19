@@ -10,11 +10,15 @@ public class ImageService
 {
     private readonly IEnumerable<IImageProfile> _imageProfiles;
     private readonly IWebHostEnvironment _hostingEnvironment;
+    private readonly string _connectionString;
 
-    public ImageService(IEnumerable<IImageProfile> imageProfiles,IWebHostEnvironment webHostEnvironment)
+    public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
+        IConfiguration configuration)
     {
+        _connectionString = configuration.GetConnectionString("MainDB");
+        if (_connectionString == null) throw new Exception("Connection string not specified");
         _imageProfiles = imageProfiles;
-        _hostingEnvironment= webHostEnvironment;
+        _hostingEnvironment = webHostEnvironment;
     }
 
     public string SaveImage(IFormFile file, ImageType imageType)
