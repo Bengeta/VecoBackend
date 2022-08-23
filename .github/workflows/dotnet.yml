@@ -29,11 +29,9 @@ jobs:
       run: dotnet publish --no-restore --configuration Release
     - name: Generate Bundle
       run: |
-        mkdir VecoBackend/VecoBackend
-        rm -rf VecoBackend/bin/Release/net6.0/VecoBackend
-        echo $appsettings > VecoBackend/VecoBackend/appsettings.json
+        echo $appsettings > appsettings.json
         dotnet tool install --global dotnet-ef
-        dotnet ef migrations bundle --project VecoBackend/ -r linux-x64 --verbose
+        dotnet ef migrations bundle -r linux-x64 --verbose
         
     - name: Download SSH key
       run: wget -O k.key "$keylink";chmod 400 k.key
