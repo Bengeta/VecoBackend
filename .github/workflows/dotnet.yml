@@ -15,6 +15,7 @@ jobs:
       keylink:  ${{ secrets.KEYLINK }}
       hostname: ${{ secrets.HOSTNAME }}
       ssh_port: ${{ secrets.SSH_PORT }}
+      appsettings: ${{ secrets.APPSETTINGS }}
 
     steps:
     - uses: actions/checkout@v2
@@ -26,8 +27,15 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet publish --no-restore --configuration Release
-      
+    - name: Generate Bundle
+      run: |
+        wget -O appsettings.json "$appsettings"
+        dotnet tool install --global dotnet-ef
+        dotnet ef migrations bundle -r linux-x64 --verbose
+        
     - name: Download SSH key
       run: wget -O k.key "$keylink";chmod 400 k.key
+    - name: Launch migrations
+      run: ssh -i k.key -o StrictHostKeyChecking=no deploy@$hostname -p $ssh_port "chmod +x ~/app/bundle; exec ~/app/bundle"
     - name: Upload artifacts
-      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/ 
+      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/
