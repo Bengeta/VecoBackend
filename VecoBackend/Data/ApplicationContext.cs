@@ -5,8 +5,13 @@ namespace VecoBackend.Data;
 
 public class ApplicationContext : DbContext
 {
-    public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
-    {}
+    private IConfiguration _configuration;
+
+    public ApplicationContext(DbContextOptions<ApplicationContext> options, IConfiguration configuration) :
+        base(options)
+    {
+        _configuration = configuration;
+    }
       DbSet<TaskModel> TaskModels{ get; set; }
       DbSet<UserModel> UserModels{ get; set; }
       DbSet<UserTaskModel> UserTaskModels{ get; set; }
@@ -18,12 +23,7 @@ public class ApplicationContext : DbContext
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("MainDB");
+        var connectionString = _configuration.GetConnectionString("MainDB");
         optionsBuilder.UseNpgsql(connectionString);
     }
 

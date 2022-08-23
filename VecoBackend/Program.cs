@@ -16,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ImageService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var connection = builder.Configuration.GetConnectionString("MainDB");
     //builder.Services.AddScoped<IMigratorService, MigratorService>();
