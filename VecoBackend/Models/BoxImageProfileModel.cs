@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using VecoBackend.Interfaces;
 
 namespace VecoBackend.Models;
-
+[Keyless]
 public class BoxImageProfileModel : IImageProfile
 {
+    private int _id;
     private const int mb = 1048576;
 
     public BoxImageProfileModel()

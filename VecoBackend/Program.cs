@@ -1,10 +1,10 @@
 using System.Reflection;
-using FluentMigrator.Runner;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using VecoBackend.Data;
 using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Services;
-using VecoBackend.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,23 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ImageService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 
 var connection = builder.Configuration.GetConnectionString("MainDB");
-builder.Services.AddScoped<IMigratorService, MigratorService>();
+    //builder.Services.AddScoped<IMigratorService, MigratorService>();
+builder.Services.AddDbContext<ApplicationContext>(x => x.UseNpgsql(connection));
 
-
-builder.Services.AddFluentMigratorCore()
-    .ConfigureRunner(rb => rb
-        .AddSqlServer()
-        .WithGlobalConnectionString(connection)
-        .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations())
-    .AddLogging(lb => lb.AddFluentMigratorConsole());
-;
 
 var app = builder.Build();
 
