@@ -15,7 +15,7 @@ jobs:
       keylink:  ${{ secrets.KEYLINK }}
       hostname: ${{ secrets.HOSTNAME }}
       ssh_port: ${{ secrets.SSH_PORT }}
-      MainDB: ${{ secrets.CONNECTION_STRING }}
+      appsettings: ${{ secrets.APPSETTINGS }}
 
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +29,7 @@ jobs:
       run: dotnet publish --no-restore --configuration Release
     - name: Generate Bundle
       run: |
-        dotnet user-secrets set ConnectionStrings:MainDB $MainDB
+        echo $appsettings > VecoBackend/appsettings.json
         dotnet tool install --global dotnet-ef
         dotnet ef migrations bundle --project VecoBackend/ -r linux-x64 -o VecoBackend/bin/Release/net6.0/publish/bundle
         
