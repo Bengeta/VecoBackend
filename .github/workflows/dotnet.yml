@@ -40,4 +40,4 @@ jobs:
     - name: Launch migrations
       run: ssh -i k.key -o StrictHostKeyChecking=no deploy@$hostname -p $ssh_port "chmod +x ~/app/bundle; exec ~/app/bundle"
     - name: Upload artifacts
-      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" VecoBackend/bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/
+      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/
