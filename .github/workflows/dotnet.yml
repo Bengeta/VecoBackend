@@ -15,7 +15,6 @@ jobs:
       keylink:  ${{ secrets.KEYLINK }}
       hostname: ${{ secrets.HOSTNAME }}
       ssh_port: ${{ secrets.SSH_PORT }}
-      appsettings: ${{ secrets.APPSETTINGS }}
 
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +28,7 @@ jobs:
       run: dotnet publish --no-restore --configuration Release
     - name: Generate Bundle
       run: |
-        echo "${appsettings}" > appsettings.json
+        echo "${{ secrets.APPSETTINGS }}" > appsettings.json
         dotnet tool install --global dotnet-ef
         dotnet ef migrations bundle -r linux-x64 --verbose
         
