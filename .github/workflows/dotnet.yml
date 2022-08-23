@@ -15,6 +15,7 @@ jobs:
       keylink:  ${{ secrets.KEYLINK }}
       hostname: ${{ secrets.HOSTNAME }}
       ssh_port: ${{ secrets.SSH_PORT }}
+      MainDB: ${{ secrets.CONNECTION_STRING }}
 
     steps:
     - uses: actions/checkout@v2
