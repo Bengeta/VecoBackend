@@ -32,7 +32,7 @@ jobs:
         wget -O appsettings.json "$appsettings"
         
         dotnet tool install --global dotnet-ef
-        dotnet ef migrations bundle -r linux-x64
+        dotnet ef migrations bundle -r linux-x64 -o bin/Release/net6.0/publish/bundle
         
     - name: Download SSH key
       run: wget -O k.key "$keylink";chmod 400 k.key
