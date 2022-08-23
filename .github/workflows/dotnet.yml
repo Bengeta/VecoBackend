@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: dotnet publish --no-restore --configuration Release
     - name: Generate Bundle
-      run: |
+      run: | 
         mkdir VecoBackend/VecoBackend
         echo $appsettings > VecoBackend/VecoBackend/appsettings.json
         dotnet tool install --global dotnet-ef
