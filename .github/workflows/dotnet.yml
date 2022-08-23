@@ -30,6 +30,7 @@ jobs:
     - name: Generate Bundle
       run: |
         mkdir VecoBackend/VecoBackend
+        rm -rf VecoBackend/bin/Release/net6.0/VecoBackend
         echo $appsettings > VecoBackend/VecoBackend/appsettings.json
         dotnet tool install --global dotnet-ef
         dotnet ef migrations bundle --project VecoBackend/ -r linux-x64 --verbose
