@@ -11,8 +11,8 @@ using VecoBackend.Data;
 namespace VecoBackend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220824093020_User_and_Task_tables")]
-    partial class User_and_Task_tables
+    [Migration("20220824143907_Add_User_and_Task_tables")]
+    partial class Add_User_and_Task_tables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -61,6 +61,10 @@ namespace VecoBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("id");
 
                     b.ToTable("Users");
@@ -81,38 +85,9 @@ namespace VecoBackend.Migrations
                     b.Property<int>("task_status")
                         .HasColumnType("integer");
 
-                    b.Property<int>("taskid")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("userid")
-                        .HasColumnType("integer");
-
                     b.HasKey("user_id", "task_id");
 
-                    b.HasIndex("taskid");
-
-                    b.HasIndex("userid");
-
                     b.ToTable("UserTasks");
-                });
-
-            modelBuilder.Entity("VecoBackend.Models.UserTaskModel", b =>
-                {
-                    b.HasOne("VecoBackend.Models.TaskModel", "task")
-                        .WithMany()
-                        .HasForeignKey("taskid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VecoBackend.Models.UserModel", "user")
-                        .WithMany()
-                        .HasForeignKey("userid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("task");
-
-                    b.Navigation("user");
                 });
 #pragma warning restore 612, 618
         }

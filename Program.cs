@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VecoBackend.Data;
 using VecoBackend.Interfaces;
 using VecoBackend.Models;
+using VecoBackend.Seeders;
 using VecoBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,16 +15,37 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ImageService>();
+builder.Services.AddSingleton<TaskService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var connection = builder.Configuration.GetConnectionString("MainDB");
-    //builder.Services.AddScoped<IMigratorService, MigratorService>();
+    builder.Services.AddTransient<ApplicationContextSeeder>();
+
 builder.Services.AddDbContext<ApplicationContext>(x => x.UseNpgsql(connection));
 
 
+builder.Services.AddSingleton<TaskService>();
 var app = builder.Build();
+
+
+
+
+if (args.Length == 0)
+    SeedData(app);
+
+//Seed Data
+void SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<ApplicationContextSeeder>();
+        service.Seed();
+    }
+}
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
