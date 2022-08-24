@@ -33,9 +33,8 @@ namespace VecoBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("points")
+                        .HasColumnType("integer");
 
                     b.Property<int>("type")
                         .HasColumnType("integer");

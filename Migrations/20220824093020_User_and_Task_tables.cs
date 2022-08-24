@@ -5,7 +5,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace VecoBackend.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class User_and_Task_tables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,7 +15,7 @@ namespace VecoBackend.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "text", nullable: false),
+                    points = table.Column<int>(type: "integer", nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
                     type = table.Column<int>(type: "integer", nullable: false)
                 },

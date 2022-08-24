@@ -11,8 +11,8 @@ using VecoBackend.Data;
 namespace VecoBackend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220823075346_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220824093020_User_and_Task_tables")]
+    partial class User_and_Task_tables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,9 +35,8 @@ namespace VecoBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("points")
+                        .HasColumnType("integer");
 
                     b.Property<int>("type")
                         .HasColumnType("integer");
