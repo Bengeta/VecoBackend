@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
-using VecoBackend.Interfaces;
+using VecoBackend.Enums;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;

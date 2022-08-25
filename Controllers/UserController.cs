@@ -5,7 +5,7 @@ using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
-
+[Route("user")]
 public class UserController : ControllerBase
 {
     private UserService _userService;
@@ -34,59 +34,37 @@ public class UserController : ControllerBase
         return BadRequest(ans.Data);
     }
 
-
-/*    [HttpPost("/getuser")]
-    public async Task<ResponseModel<UserModel>> GetUser([Bind("User")] TokenResponse response)
+   [HttpGet("/getuser")]
+    public async Task<IActionResult> GetUser()
     {
-        var ans = await _userService.GetUser(response.token);
-        var answer = new ResponseModel<UserModel>();
-        answer.success = false;
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var ans = await _userService.GetUser(token);
         if (ans != null)
-        {
-            answer.data = ans;
-            answer.success = true;
-        }
-
-        return answer;
+            return Ok(ans);
+        return BadRequest("User not found");
     }
-    */
 
 
-    /*
+    
     [HttpPut("/editepassword")]
-    public async Task<ResponseModel<String>?> EditePassword([Bind("User")] EditPasswordResponse response)
+    public async Task<IActionResult> EditePassword([Bind("User")] EditPasswordResponse response)
     {
-        var ans = await _userService.ChangePassword(response.token, response.old_password, response.new_password);
-        var answer = new ResponseModel<String>();
-        answer.success = false;
-        if (ans != null)
-        {
-            answer.data = ans;
-            answer.success = true;
-        }
-
-        return answer;
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var ans = await _userService.EditePassword(token, response.old_password, response.new_password);
+        if (ans.success)
+            return Ok(ans.Data);
+        return BadRequest(ans.Data);
     }
 
 
     [HttpPut("/editeusername")]
-    public async Task<Result> EditeUsername([Bind("User")] EditUsernameResponse response)
+    public async Task<IActionResult> EditeUsername([Bind("User")] EditUsernameResponse response)
     {
-        return await _userService.ChangeUsername(response.token, response.name);
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var ans = await _userService.EditeUsername(token, response.new_username);
+        if (ans.success)
+            return Ok(ans.Data);
+        return BadRequest(ans.Data);
+        
     }
-
-    [HttpPost("/lastlogins")]
-    public async Task<ResponseModel<List<HistoryLoginModel>>> GetUserLoginHistory([Bind("User")] TokenResponse response)
-    {
-        var ans = await _userService.GetLoginHistory(response.token);
-        var answer = new ResponseModel<List<HistoryLoginModel>>();
-        answer.success = false;
-        if (ans.Count > 0)
-        {
-            answer.data = ans;
-            answer.success = true;
-        }
-
-        return answer;
-    }*/
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
+using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
@@ -22,7 +23,7 @@ public class TaskController : ControllerBase
     [Route("task/all")]
     public async Task<IActionResult> GetUserAllTasks()
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetAllTasks(token);
         if(tasks == null)
         {
@@ -31,5 +32,18 @@ public class TaskController : ControllerBase
         var ans = new TaskListResponse();
         ans.tasks = tasks;
         return Ok(ans);
+    }
+    
+    [HttpPost]
+    [Route("task/status/change")]
+    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusResponse request)
+    {
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var tasks = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
+        if(tasks == null)
+        {
+            return BadRequest();
+        }
+        return Ok();
     }
 }

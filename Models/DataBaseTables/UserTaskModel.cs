@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TaskStatus = VecoBackend.Interfaces.TaskStatus;
+using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Models;
 

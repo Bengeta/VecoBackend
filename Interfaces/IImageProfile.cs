@@ -1,3 +1,5 @@
+using VecoBackend.Enums;
+
 namespace VecoBackend.Interfaces;
 
 public interface IImageProfile

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using VecoBackend.Data;
 using VecoBackend.Models;
+using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 
 namespace VecoBackend.Services;
@@ -58,6 +59,25 @@ public class TaskService
         {
             Console.WriteLine(e);
             throw;
+        }
+    }
+    
+    public async Task<Boolean> ChangeTaskStatus(string token,TaskStatus newStatus, int taskId)
+    {
+        try
+        {
+            var user = await context.UserModels.FirstOrDefaultAsync(u => u.token == token);
+            if (user == null) return false;
+            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(ut => ut.user_id == user.id && ut.task_id == taskId);
+            if (userTask == null) return false;
+            userTask.task_status = newStatus;
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
         }
     }
 

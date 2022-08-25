@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
-using VecoBackend.Interfaces;
+using VecoBackend.Enums;
 
 namespace VecoBackend.Models;
 

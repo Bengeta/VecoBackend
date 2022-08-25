@@ -3,6 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 using VecoBackend.Interfaces;
+using VecoBackend.Enums;
 
 namespace VecoBackend.Services;
 

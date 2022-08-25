@@ -1,3 +1,4 @@
+using VecoBackend.Enums;
 using VecoBackend.Interfaces;
 
 namespace VecoBackend.Models;

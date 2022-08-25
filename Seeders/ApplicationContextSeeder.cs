@@ -1,7 +1,7 @@
 using VecoBackend.Data;
-using VecoBackend.Interfaces;
+using VecoBackend.Enums;
 using VecoBackend.Models;
-using TaskStatus = VecoBackend.Interfaces.TaskStatus;
+using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Seeders;
 

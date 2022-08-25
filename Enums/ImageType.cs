@@ -1,4 +1,4 @@
-namespace VecoBackend.Interfaces;
+namespace VecoBackend.Enums;
 
 public enum ImageType
 {
