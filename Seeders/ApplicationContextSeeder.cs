@@ -55,7 +55,7 @@ public class ApplicationContextSeeder
                 id = 1,
                 name = "Иван Иванов",
                 isAdmin = false,
-                token = "asdf",
+                token = "asdw",
                 username = "ivanov",
                 password = "asdf",
                 salt = "asdf"
@@ -65,9 +65,9 @@ public class ApplicationContextSeeder
                 id = 2,
                 name = "Илья Ильин",
                 isAdmin = false,
-                token = "asdf",
+                token = "asdq",
                 username = "ilin",
-                password = "asdf",
+                password = "asd",
                 salt = "asdf"
             });
             users.Add(new UserModel()
