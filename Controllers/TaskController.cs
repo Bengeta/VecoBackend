@@ -1,6 +1,7 @@
 using a;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
 using VecoBackend.Services;
 
@@ -17,11 +18,12 @@ public class TaskController : ControllerBase
     }
 
 
-    [HttpPost]
+    [HttpGet]
     [Route("task/all")]
-    public async Task<IActionResult> GetUserAllTasks(TokenRequest tokenResponse)
+    public async Task<IActionResult> GetUserAllTasks()
     {
-        var tasks = await _taskService.GetAllTasks(tokenResponse.token);
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var tasks = await _taskService.GetAllTasks(token);
         if(tasks == null)
         {
             return BadRequest();

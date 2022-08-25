@@ -26,7 +26,7 @@ public class TaskService
     {
         try
         {
-                var tasks = await context.TaskModels.Where(s=> s.id == 1).ToListAsync();
+                var tasks = await context.TaskModels.ToListAsync();
                 return tasks;
             
         }

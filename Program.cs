@@ -16,6 +16,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ImageService>();
 builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<UserService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);

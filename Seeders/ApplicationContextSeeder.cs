@@ -16,6 +16,10 @@ public class ApplicationContextSeeder
 
     public void Seed()
     {
+        _applicationContext.TaskModels.RemoveRange(_applicationContext.TaskModels);
+        _applicationContext.UserModels.RemoveRange(_applicationContext.UserModels);
+        _applicationContext.UserTaskModels.RemoveRange(_applicationContext.UserTaskModels);
+        _applicationContext.SaveChanges();
         var tasks = new List<TaskModel>();
         if (!_applicationContext.TaskModels.Any())
         {
@@ -51,21 +55,30 @@ public class ApplicationContextSeeder
                 id = 1,
                 name = "Иван Иванов",
                 isAdmin = false,
-                token = "asdf"
+                token = "asdf",
+                username = "ivanov",
+                password = "asdf",
+                salt = "asdf"
             });
             users.Add(new UserModel()
             {
                 id = 2,
                 name = "Илья Ильин",
                 isAdmin = false,
-                token = "asdf"
+                token = "asdf",
+                username = "ilin",
+                password = "asdf",
+                salt = "asdf"
             });
             users.Add(new UserModel()
             {
                 id = 3,
                 name = "Руслан Гасанов",
                 isAdmin = true,
-                token = "asdf"
+                token = "asdf",
+                username = "gsanov",
+                password = "asdf",
+                salt = "asdf"
             });
             _applicationContext.UserModels.AddRange(users);
         }

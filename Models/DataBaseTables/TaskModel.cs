@@ -14,4 +14,5 @@ public class TaskModel
     public string description { get; set; }
     
     public TaskType type { get; set; }
+    public bool isSeen { get; set; }
 }
