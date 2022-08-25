@@ -62,22 +62,22 @@ public class TaskService
         }
     }
     
-    public async Task<Boolean> ChangeTaskStatus(string token,TaskStatus newStatus, int taskId)
+    public async Task<int> ChangeTaskStatus(string token,TaskStatus newStatus, int taskId)
     {
         try
         {
             var user = await context.UserModels.FirstOrDefaultAsync(u => u.token == token);
-            if (user == null) return false;
+            if (user == null) return -1;
             var userTask = await context.UserTaskModels.FirstOrDefaultAsync(ut => ut.user_id == user.id && ut.task_id == taskId);
-            if (userTask == null) return false;
+            if (userTask == null) return -1;
             userTask.task_status = newStatus;
             await context.SaveChangesAsync();
-            return true;
+            return userTask.id;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return false;
+            return -1;
         }
     }
 

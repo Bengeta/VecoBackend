@@ -2,8 +2,10 @@ using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using VecoBackend.Data;
 using VecoBackend.Interfaces;
 using VecoBackend.Enums;
+using VecoBackend.Models;
 
 namespace VecoBackend.Services;
 
@@ -12,6 +14,7 @@ public class ImageService
     private readonly IEnumerable<IImageProfile> _imageProfiles;
     private readonly IWebHostEnvironment _hostingEnvironment;
     private readonly string _connectionString;
+    private ApplicationContext context;
 
     public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
         IConfiguration configuration)
@@ -21,8 +24,12 @@ public class ImageService
         _imageProfiles = imageProfiles;
         _hostingEnvironment = webHostEnvironment;
     }
+    public void AddContext(ApplicationContext _applicationContext)
+    {
+        context = _applicationContext;
+    }
 
-    public string SaveImage(IFormFile file, ImageType imageType)
+    public async Task<string> SaveImage(IFormFile file, int task_id, ImageType imageType)
     {
         var imageProfile = _imageProfiles.FirstOrDefault(profile =>
             profile.ImageType == imageType);
@@ -54,8 +61,10 @@ public class ImageService
         Resize(image, imageProfile);
         Crop(image, imageProfile);
         image.Save(filePath, new JpegEncoder {Quality = 75});
-
-        return Path.Combine(imageProfile.Folder, fileName);
+        
+        var fileUrl = Path.Combine(imageProfile.Folder, fileName);
+        await SaveImageToDB(fileUrl, task_id);
+        return fileUrl;
     }
 
     private void ValidateExtension(IFormFile file, IImageProfile imageProfile)
@@ -113,5 +122,26 @@ public class ImageService
         var y = heightDifference / 2;
 
         return new Rectangle(x, y, imageProfile.Width, imageProfile.Height);
+    }
+    
+    
+    private async Task<Boolean> SaveImageToDB(string filePath, int task_id)
+    {
+        try
+        {
+            var image = new TaskPhotoModel()
+            {
+                photoPath = filePath,
+                UserTaskId = task_id
+            };
+            context.TaskPhotoModels.Add(image);
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
     }
 }

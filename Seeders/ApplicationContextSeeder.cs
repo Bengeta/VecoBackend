@@ -83,6 +83,7 @@ public class ApplicationContextSeeder
             _applicationContext.UserModels.AddRange(users);
         }
 
+        var i = 0;
         if (!_applicationContext.UserTaskModels.Any())
         {
             var users_tasks = new List<UserTaskModel>();
@@ -92,7 +93,7 @@ public class ApplicationContextSeeder
                     user_id = u.id,
                     task_id = task.id,
                     task_status = TaskStatus.Created,
-                    photos = "kj"
+                    id = ++i
                 }))
             );
             _applicationContext.UserTaskModels.AddRange(users_tasks);

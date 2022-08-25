@@ -16,11 +16,10 @@ public class ApplicationContext : DbContext
     public DbSet<TaskModel> TaskModels { get; set; }
     public DbSet<UserModel> UserModels { get; set; }
     public DbSet<UserTaskModel> UserTaskModels { get; set; }
+    public DbSet<TaskPhotoModel> TaskPhotoModels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserTaskModel>()
-            .HasKey(t => new {t.user_id, t.task_id});
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -39,11 +39,11 @@ public class TaskController : ControllerBase
     public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusResponse request)
     {
         var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var tasks = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
-        if(tasks == null)
+        var tasks_id = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
+        if(tasks_id == -1)
         {
             return BadRequest();
         }
-        return Ok();
+        return Ok(tasks_id);
     }
 }

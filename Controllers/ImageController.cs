@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
+using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
@@ -11,45 +13,43 @@ public class ImageController : ControllerBase
 {
     private ImageService _imageService;
 
-    public ImageController(ImageService imageService)
+    public ImageController(ImageService imageService,ApplicationContext context)
     {
         _imageService = imageService;
+        imageService.AddContext(context);
     }
 
     [HttpPost]
     [Route("upload/box")]
-    public IActionResult UploadBoxImage(IFormFile file)
+    public async Task<IActionResult> UploadBoxImage(UploadImageResponse response)
     {
-        return UploadImage(file, ImageType.Box);
+        return await UploadImage(response, ImageType.Box);
     }
 
     [HttpPost]
     [Route("upload/logo")]
-    public IActionResult UploadLogoImage(IFormFile file)
+    public async Task<IActionResult> UploadLogoImage(UploadImageResponse response)
     {
-        return UploadImage(file, ImageType.Logo);
+        return await UploadImage(response, ImageType.Logo);
     }
 
-    private IActionResult UploadImage(IFormFile file, ImageType type)
+    private async Task<IActionResult> UploadImage(UploadImageResponse response, ImageType type)
     {
-        if (file.Length == 0)
+        if (response.file.Length == 0)
             return BadRequest("File is empty");
 
         try
         {
-            var filePath = _imageService.SaveImage(file, type);
+            var filePath = await _imageService.SaveImage(response.file, response.task_id, type);
             return Ok();
         }
         catch (ImageProcessingException ex)
         {
-            //var response = new ApiResponse(ErrorCodes.ImageProcessing, ex.Message);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-           // var response = new ApiResponse(ErrorCodes.Unknown, ex.Message);
             return Ok(ex.Message);
         }
-        return null;
     }
 }
