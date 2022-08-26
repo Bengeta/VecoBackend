@@ -5,7 +5,6 @@ using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
-[Route("user")]
 public class UserController : ControllerBase
 {
     private UserService _userService;
@@ -15,17 +14,17 @@ public class UserController : ControllerBase
         _userService = _userService;
         _userService.AddContext(_applicationContext);
     } 
-        [HttpPost("/signup")]
-    public async Task<IActionResult> SignUp([Bind("User")] SignUpResponse response)
+        [HttpPost("auth/signup")]
+    public async Task<IActionResult> SignUp([Bind("User")] SignUpRequest request)
     {
-        var ans = await _userService.SignUp(response.name, response.username, response.password);
+        var ans = await _userService.SignUp(request.name, request.username, request.password);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);
       
     }
 
-    [HttpPost("/login")]
+    [HttpPost("auth/login")]
     public async Task<IActionResult> Login([Bind("User")] LoginRequest loginRequest)
     {
         var ans = await _userService.Login(loginRequest.username, loginRequest.password);
@@ -34,7 +33,7 @@ public class UserController : ControllerBase
         return BadRequest(ans.Data);
     }
 
-   [HttpGet("/getuser")]
+   [HttpGet("getuser")]
     public async Task<IActionResult> GetUser()
     {
         var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
@@ -46,11 +45,11 @@ public class UserController : ControllerBase
 
 
     
-    [HttpPut("/editepassword")]
-    public async Task<IActionResult> EditePassword([Bind("User")] EditPasswordResponse response)
+    [HttpPut("editepassword")]
+    public async Task<IActionResult> EditePassword([Bind("User")] EditPasswordRequest request)
     {
         var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.EditePassword(token, response.old_password, response.new_password);
+        var ans = await _userService.EditePassword(token, request.old_password, request.new_password);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);
@@ -58,10 +57,10 @@ public class UserController : ControllerBase
 
 
     [HttpPut("/editeusername")]
-    public async Task<IActionResult> EditeUsername([Bind("User")] EditUsernameResponse response)
+    public async Task<IActionResult> EditeUsername([Bind("User")] EditUsernameRequest request)
     {
         var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.EditeUsername(token, response.new_username);
+        var ans = await _userService.EditeUsername(token, request.new_username);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);

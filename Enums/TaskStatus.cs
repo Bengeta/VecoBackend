@@ -5,5 +5,7 @@ public enum TaskStatus
     Created,
     OnCheck,
     Finished,
-    Invisible
+    IsChecking,
+    Invisible,
+    
 }

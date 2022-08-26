@@ -16,4 +16,6 @@ public class UserModel
     public string name { get; set; }
 
     public Boolean isAdmin { get; set; }
+    
+    public int points { get; set; }
 }

@@ -1,6 +1,6 @@
 namespace VecoBackend.Responses;
 
-public class EditUsernameResponse
+public class EditUsernameRequest
 {
     public string new_username { get; set; }
 }

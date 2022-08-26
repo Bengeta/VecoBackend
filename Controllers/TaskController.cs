@@ -35,8 +35,8 @@ public class TaskController : ControllerBase
     }
     
     [HttpPost]
-    [Route("task/status/change")]
-    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusResponse request)
+    [Route("task/status_change")]
+    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusRequest request)
     {
         var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks_id = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);

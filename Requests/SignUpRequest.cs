@@ -1,6 +1,6 @@
 namespace VecoBackend.Responses;
 
-public class SignUpResponse
+public class SignUpRequest
 {
     public string name;
     public string username;

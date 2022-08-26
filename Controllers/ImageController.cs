@@ -21,26 +21,63 @@ public class ImageController : ControllerBase
 
     [HttpPost]
     [Route("upload/box")]
-    public async Task<IActionResult> UploadBoxImage(UploadImageResponse response)
+    public async Task<IActionResult> UploadBoxImage(UploadImageRequest request)
     {
-        return await UploadImage(response, ImageType.Box);
+        
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        return await UploadImage(request, ImageType.Box);
     }
 
     [HttpPost]
     [Route("upload/logo")]
-    public async Task<IActionResult> UploadLogoImage(UploadImageResponse response)
+    public async Task<IActionResult> UploadLogoImage(UploadImageRequest request)
     {
-        return await UploadImage(response, ImageType.Logo);
+        return await UploadImage(request, ImageType.Logo);
     }
-
-    private async Task<IActionResult> UploadImage(UploadImageResponse response, ImageType type)
+    [HttpDelete]
+    [Route("delete/id")]
+    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response)
     {
-        if (response.file.Length == 0)
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var res = await _imageService.DeleteImageById(token,response.task_id,response.image_id);
+        if (res)
+            return Ok();
+        return BadRequest();
+    }
+    
+    [HttpDelete]
+    [Route("delete/task")]
+    public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest response)
+    {
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var res = await _imageService.DeleteImageTask(token,response.task_id);
+        if (res)
+            return Ok();
+        return BadRequest();
+    }
+    
+    [HttpGet]
+    [Route("get/task")]
+    public async Task<IActionResult> GetImageTask(GetImageTaskRequest request)
+    {
+        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var res = await _imageService.GetImageTask(token,request.task_id);
+        if (res != null)
+            return Ok(res);
+        return BadRequest();
+    }
+    
+    
+    
+
+    private async Task<IActionResult> UploadImage(UploadImageRequest request, ImageType type)
+    {
+        if (request.file.Length == 0)
             return BadRequest("File is empty");
 
         try
         {
-            var filePath = await _imageService.SaveImage(response.file, response.task_id, type);
+            var filePath = await _imageService.SaveImage(request.file, request.task_id, type);
             return Ok();
         }
         catch (ImageProcessingException ex)

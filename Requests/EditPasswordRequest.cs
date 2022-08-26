@@ -1,6 +1,6 @@
 namespace VecoBackend.Responses;
 
-public class EditPasswordResponse
+public class EditPasswordRequest
 {
     public string token { get; set; }
     public string old_password { get; set; }

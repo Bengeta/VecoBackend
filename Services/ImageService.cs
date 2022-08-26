@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -6,6 +7,7 @@ using VecoBackend.Data;
 using VecoBackend.Interfaces;
 using VecoBackend.Enums;
 using VecoBackend.Models;
+using VecoBackend.Responses;
 
 namespace VecoBackend.Services;
 
@@ -24,6 +26,7 @@ public class ImageService
         _imageProfiles = imageProfiles;
         _hostingEnvironment = webHostEnvironment;
     }
+
     public void AddContext(ApplicationContext _applicationContext)
     {
         context = _applicationContext;
@@ -61,11 +64,155 @@ public class ImageService
         Resize(image, imageProfile);
         Crop(image, imageProfile);
         image.Save(filePath, new JpegEncoder {Quality = 75});
-        
+
         var fileUrl = Path.Combine(imageProfile.Folder, fileName);
         await SaveImageToDB(fileUrl, task_id);
         return fileUrl;
     }
+
+
+    public async Task<Boolean> DeleteImageById(string token, int task_id, int image_id)
+    {
+        try
+        {
+            var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+            if (user.token != token && !user.isAdmin)
+                return false;
+            var image = await context.TaskPhotoModels.FindAsync(image_id);
+            if (image == null)
+                return false;
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            context.TaskPhotoModels.Remove(image);
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public async Task<Boolean> DeleteImageTask(string token, int task_id)
+    {
+        try
+        {
+            var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+            if (user.token != token && !user.isAdmin)
+                return false;
+            var images = await context.TaskPhotoModels.Where(x => x.id == task_id).ToListAsync();
+            foreach (var image in images)
+            {
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+
+            context.TaskPhotoModels.RemoveRange(images);
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public async Task<List<Image>> GetImageTask(string token, int task_id)
+    {
+        try
+        {
+            var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+            if (user.token != token && !user.isAdmin)
+                return null;
+            var images = await context.TaskPhotoModels.Where(x => x.id == task_id).ToListAsync();
+            var boxImages = new List<Image>();
+            foreach (var image in images)
+            {
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
+                if (File.Exists(filePath))
+                {
+                    boxImages.Add(Image.Load(filePath));
+                }
+            }
+
+            return boxImages;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    public async Task<ImageSetResponse> CheckImageTask()
+    {
+        try
+        {
+            var task = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_status == Enums.TaskStatus.OnCheck);
+            if (task == null)
+                return null;
+            task.task_status = Enums.TaskStatus.IsChecking;
+            await context.SaveChangesAsync();
+            var images = await GetImageTask("asdf", task.task_id);
+            var ans = new ImageSetResponse()
+            {
+                Images = images,
+                UserTaskId = task.task_id
+            };
+            return ans;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+
+    public async Task<ImageSetResponse> AcceptTask(int task_id,string token)
+    {
+        try
+        {
+            var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+            var task = await context.TaskModels.FirstOrDefaultAsync(u =>
+                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.task_id);
+            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
+            userTask.task_status = Enums.TaskStatus.Finished;
+            user.points += task.points;
+            var ans = await CheckImageTask();
+            await DeleteImageTask(token, task_id);
+            await context.SaveChangesAsync();
+            return ans;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+    
+    public async Task<ImageSetResponse> DenyTask(string token,int task_id)
+    {
+        try
+        {
+            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
+            userTask.task_status = Enums.TaskStatus.Created;
+            var ans = await CheckImageTask();
+            await DeleteImageTask(token, task_id);
+            await context.SaveChangesAsync();
+            return ans;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+
 
     private void ValidateExtension(IFormFile file, IImageProfile imageProfile)
     {
@@ -123,8 +270,8 @@ public class ImageService
 
         return new Rectangle(x, y, imageProfile.Width, imageProfile.Height);
     }
-    
-    
+
+
     private async Task<Boolean> SaveImageToDB(string filePath, int task_id)
     {
         try
