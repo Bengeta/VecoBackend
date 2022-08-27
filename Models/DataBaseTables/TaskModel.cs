@@ -7,6 +7,7 @@ namespace VecoBackend.Models;
 [Table("Tasks")]
 public class TaskModel
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int id { get; set; }
     
     public int points { get; set; }

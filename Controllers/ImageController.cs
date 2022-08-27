@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Net.Http.Headers;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
 using VecoBackend.Data;
@@ -8,7 +10,8 @@ using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
-
+[ApiController]
+[Authorize]
 public class ImageController : ControllerBase
 {
     private ImageService _imageService;
@@ -24,7 +27,7 @@ public class ImageController : ControllerBase
     public async Task<IActionResult> UploadBoxImage(UploadImageRequest request)
     {
         
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         return await UploadImage(request, ImageType.Box);
     }
 
@@ -38,7 +41,7 @@ public class ImageController : ControllerBase
     [Route("delete/id")]
     public async Task<IActionResult> DeleteImageById(DeleteImageRequest response)
     {
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.DeleteImageById(token,response.task_id,response.image_id);
         if (res)
             return Ok();
@@ -49,18 +52,18 @@ public class ImageController : ControllerBase
     [Route("delete/task")]
     public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest response)
     {
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.DeleteImageTask(token,response.task_id);
         if (res)
             return Ok();
         return BadRequest();
     }
     
-    [HttpGet]
+    [HttpPost]
     [Route("get/task")]
     public async Task<IActionResult> GetImageTask(GetImageTaskRequest request)
     {
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.GetImageTask(token,request.task_id);
         if (res != null)
             return Ok(res);

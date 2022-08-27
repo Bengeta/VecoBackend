@@ -4,6 +4,7 @@ namespace VecoBackend.Models;
 [Table("TaskPhoto")]
 public class TaskPhotoModel
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int id { get; set; }
     public int UserTaskId { get; set; }
     public string photoPath { get; set; }

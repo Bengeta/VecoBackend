@@ -1,4 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
 using VecoBackend.Models;
 
@@ -7,6 +11,7 @@ namespace VecoBackend.Services;
 public class UserService
 {
     private ApplicationContext context;
+    private JwtSettings _options;
 
 
     public void AddContext(ApplicationContext applicationContext)
@@ -14,6 +19,10 @@ public class UserService
         context = applicationContext;
     }
 
+    public void AddJwtSettings(JwtSettings _options)
+    {
+        this._options = _options;
+    }
     public async Task<ServiseResponse<string>> Login(string username, string password)
     {
         try
@@ -43,17 +52,34 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.name == username).FirstAsync();
-            if (user != null)
+            var user = await context.UserModels.Where(x => x.name == username).AnyAsync();
+            if (user)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User already exists"};
             }
+            List<Claim> claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, name));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, username));
+            //claims.Add(new Claim(ClaimTypes.Email, email));
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
+
+            var token = new JwtSecurityToken(
+                issuer: _options.Issuer,
+                audience: _options.Audience,
+                claims: claims,
+                signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
+            );
+            
+            var Token = new JwtSecurityTokenHandler().WriteToken(token);
             var newUser = new UserModel()
             {
                 name = name,
                 username = username,
                 password = password,
-                token = Guid.NewGuid().ToString()
+                salt = "asd",
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                email = "asd@"
             };
             context.UserModels.Add(newUser);
             await context.SaveChangesAsync();

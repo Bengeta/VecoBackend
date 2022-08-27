@@ -58,7 +58,8 @@ public class ApplicationContextSeeder
                 token = "asdw",
                 username = "ivanov",
                 password = "asdf",
-                salt = "asdf"
+                salt = "asdf",
+                email = "asd@"
             });
             users.Add(new UserModel()
             {
@@ -68,7 +69,8 @@ public class ApplicationContextSeeder
                 token = "asdq",
                 username = "ilin",
                 password = "asd",
-                salt = "asdf"
+                salt = "asdf",
+                email = "asd@"
             });
             users.Add(new UserModel()
             {
@@ -78,7 +80,8 @@ public class ApplicationContextSeeder
                 token = "asdf",
                 username = "gsanov",
                 password = "asdf",
-                salt = "asdf"
+                salt = "asdf",
+                email = "asd@"
             });
             _applicationContext.UserModels.AddRange(users);
         }

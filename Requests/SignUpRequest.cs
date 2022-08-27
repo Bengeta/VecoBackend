@@ -2,7 +2,7 @@ namespace VecoBackend.Responses;
 
 public class SignUpRequest
 {
-    public string name;
-    public string username;
-    public string password;
+    public string name { get; set; }
+    public string username { get; set; }
+    public string password { get; set; }
 }

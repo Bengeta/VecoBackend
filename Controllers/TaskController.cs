@@ -1,4 +1,5 @@
 using a;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
@@ -7,7 +8,8 @@ using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
-
+[ApiController]
+[Authorize]
 public class TaskController : ControllerBase
 {
     private TaskService _taskService;
@@ -19,11 +21,11 @@ public class TaskController : ControllerBase
     }
 
 
-    [HttpGet]
+    [HttpPost, Authorize]
     [Route("task/all")]
     public async Task<IActionResult> GetUserAllTasks()
     {
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetAllTasks(token);
         if(tasks == null)
         {
@@ -38,7 +40,7 @@ public class TaskController : ControllerBase
     [Route("task/status_change")]
     public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusRequest request)
     {
-        var token = "asdf";//Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks_id = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
         if(tasks_id == -1)
         {
