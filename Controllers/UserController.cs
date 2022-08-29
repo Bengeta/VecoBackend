@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
 using VecoBackend.Models;
+using VecoBackend.Requests;
 using VecoBackend.Responses;
 using VecoBackend.Services;
 
@@ -80,7 +81,15 @@ public class UserController : ControllerBase
         return BadRequest("User not found");
     }
 
-
+    [HttpPost("/device/add")]
+    public async Task<IActionResult> AddDevice(AddTokenDeviceRequest request)
+    {
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var ans = await _userService.AddDevice(token, request.deviceToken);
+        if (ans)
+            return Ok();
+        return BadRequest();
+    }
     [HttpPut("editepassword")]
     public async Task<IActionResult> EditePassword(EditPasswordRequest request)
     {

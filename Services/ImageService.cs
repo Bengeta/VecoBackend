@@ -17,14 +17,16 @@ public class ImageService
     private readonly IWebHostEnvironment _hostingEnvironment;
     private readonly string _connectionString;
     private ApplicationContext context;
+    private NotificationService notificationService;
 
     public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
-        IConfiguration configuration)
+        IConfiguration configuration,NotificationService notificationService)
     {
         _connectionString = configuration.GetConnectionString("MainDB");
         if (_connectionString == null) throw new Exception("Connection string not specified");
         _imageProfiles = imageProfiles;
         _hostingEnvironment = webHostEnvironment;
+        this.notificationService = notificationService;
     }
 
     public void AddContext(ApplicationContext _applicationContext)
@@ -186,6 +188,7 @@ public class ImageService
             var ans = await CheckImageTask();
             await DeleteImageTask(token, task_id);
             await context.SaveChangesAsync();
+            await Notificate(userTask.user_id,userTask.task_id,false);
             return ans;
         }
         catch (Exception e)
@@ -204,12 +207,29 @@ public class ImageService
             var ans = await CheckImageTask();
             await DeleteImageTask(token, task_id);
             await context.SaveChangesAsync();
+            await Notificate(userTask.user_id,userTask.task_id,false);
             return ans;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             return null;
+        }
+    }
+    
+    private async Task Notificate( int user_id,int task_id,Boolean isAccept)
+    {
+        try
+        {
+            var tokens = await context.NotificationTokensModels.Where(x => x.UserId == user_id).Select(u=>u.Token).ToListAsync();
+            var task = await context.TaskModels.FindAsync(task_id);
+
+            await NotificationService.Notify(tokens,isAccept,task.description);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 

@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddSingleton<ImageService>();
 builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
@@ -125,6 +128,11 @@ app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = string.Empty;
+});
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.GetApplicationDefault()
 });
 
 app.UseRouting();

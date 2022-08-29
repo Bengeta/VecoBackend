@@ -149,4 +149,25 @@ public class UserService
             return new ServiseResponse<string>() {success = false, Data = "Something went wrong"};
         }
     }
+    
+    public async Task<Boolean> AddDevice(string token, string deviceToken)
+    {
+        try
+        {
+            var user = await context.UserModels.Where(x => x.token == token).FirstAsync();
+            var Notification = new NotificationTokensModel()
+            {
+                Token = deviceToken,
+                UserId = user.id
+            };
+            context.NotificationTokensModels.Add(Notification);
+            context.SaveChanges();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
 }
