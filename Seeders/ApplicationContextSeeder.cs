@@ -1,3 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
@@ -8,13 +12,11 @@ namespace VecoBackend.Seeders;
 public class ApplicationContextSeeder
 {
     private readonly ApplicationContext _applicationContext;
-
     public ApplicationContextSeeder(ApplicationContext _applicationContext)
     {
         this._applicationContext = _applicationContext;
     }
-
-    public void Seed()
+    public void Seed(string SecretKey,string Issuer,string Audience)
     {
         _applicationContext.TaskModels.RemoveRange(_applicationContext.TaskModels);
         _applicationContext.UserModels.RemoveRange(_applicationContext.UserModels);
@@ -50,6 +52,7 @@ public class ApplicationContextSeeder
         var users = new List<UserModel>();
         if (!_applicationContext.UserModels.Any())
         {
+            
             users.Add(new UserModel()
             {
                 id = 1,
@@ -83,6 +86,20 @@ public class ApplicationContextSeeder
                 salt = "asdf",
                 email = "asd@"
             });
+             List<Claim> claims = new List<Claim>();
+             claims.Add(new Claim(ClaimTypes.Name, users[2].name));
+             claims.Add(new Claim(ClaimTypes.NameIdentifier, users[2].username));
+             //claims.Add(new Claim(ClaimTypes.Email, email));
+            
+             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+            
+             var token = new JwtSecurityToken(
+                 issuer: Issuer,
+                audience: Audience,
+                claims: claims,
+                signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
+             );
+             users[2].token = new JwtSecurityTokenHandler().WriteToken(token);
             _applicationContext.UserModels.AddRange(users);
         }
 

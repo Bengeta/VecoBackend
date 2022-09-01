@@ -106,7 +106,7 @@ void SeedData(IHost app)
     using (var scope = scopedFactory.CreateScope())
     {
         var service = scope.ServiceProvider.GetService<ApplicationContextSeeder>();
-        service.Seed();
+        service.Seed(secretKey, issuer, audience);
     }
 }
 
@@ -130,10 +130,11 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+/*
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault()
-});
+});*/
 
 app.UseRouting();
 app.UseAuthentication();
