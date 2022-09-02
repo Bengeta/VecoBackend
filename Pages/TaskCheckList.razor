@@ -1,0 +1,54 @@
+@page "/TaskCheckList"
+@inject NavigationManager NavigationManager
+<h3>TaskCheckList</h3>
+<div class="table-responsible">
+    <table class="table table-stripped">
+        <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Points</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (CheckTaskListResponses == null)
+        {
+            <tr>Loading Data ...</tr>
+        }
+        else
+        {
+            @foreach (var task in CheckTaskListResponses)
+            {
+                <tr @onclick="() => OpenTaskCheck(task.userTaskId)">
+                    <td>
+                        @task.UserName
+                    </td>
+                    <td>
+                        @task.description
+                    </td>
+                    <td>
+                        @task.points
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<CheckTaskListResponse> CheckTaskListResponses { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        taskService.AddContext(applicationContext);
+        var imageResponse = await taskService.GetCheckTaskList();
+        CheckTaskListResponses = imageResponse;
+    }
+
+    protected void OpenTaskCheck(int userTaskId)
+    {
+        NavigationManager.NavigateTo($"/TaskCheck/{userTaskId}");
+    }
+
+}

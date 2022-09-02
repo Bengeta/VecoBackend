@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using VecoBackend.Data;
 using VecoBackend.Models;
+using VecoBackend.Responses;
 using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 
@@ -61,14 +62,15 @@ public class TaskService
             throw;
         }
     }
-    
-    public async Task<int> ChangeTaskStatus(string token,TaskStatus newStatus, int taskId)
+
+    public async Task<int> ChangeTaskStatus(string token, TaskStatus newStatus, int taskId)
     {
         try
         {
             var user = await context.UserModels.FirstOrDefaultAsync(u => u.token == token);
             if (user == null) return -1;
-            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(ut => ut.user_id == user.id && ut.task_id == taskId);
+            var userTask =
+                await context.UserTaskModels.FirstOrDefaultAsync(ut => ut.user_id == user.id && ut.task_id == taskId);
             if (userTask == null) return -1;
             userTask.task_status = newStatus;
             await context.SaveChangesAsync();
@@ -81,5 +83,40 @@ public class TaskService
         }
     }
 
+    public async Task<List<CheckTaskListResponse>> GetCheckTaskList()
+    {
+        try
+        {
+            var tasks = await (from user in context.UserModels
+                join user_task in context.UserTaskModels on user.id equals user_task.user_id
+                join task in context.TaskModels on user_task.task_id equals task.id
+                where user_task.task_status == TaskStatus.OnCheck
+                select new
+                {
+                    id = user_task.id,
+                    points = task.points,
+                    description = task.description,
+                    type = task.type,
+                    name = user.name
+                }).ToListAsync();
+            var answer = new List<CheckTaskListResponse>();
+            foreach (var task in tasks)
+            {
+                answer.Add(new CheckTaskListResponse()
+                {
+                    userTaskId = task.id,
+                    points = task.points,
+                    description = task.description,
+                    UserName = task.name,
+                });
+            }
 
+            return answer;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
 }

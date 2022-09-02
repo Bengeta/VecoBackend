@@ -20,7 +20,7 @@ public class ImageService
     private NotificationService notificationService;
 
     public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
-        IConfiguration configuration,NotificationService notificationService)
+        IConfiguration configuration, NotificationService notificationService)
     {
         _connectionString = configuration.GetConnectionString("MainDB");
         if (_connectionString == null) throw new Exception("Connection string not specified");
@@ -97,15 +97,19 @@ public class ImageService
         }
     }
 
-    public async Task<Boolean> DeleteImageTask(string token, int task_id)
+    public async Task<Boolean> DeleteImageTask(int taskId, string token = null)
     {
         try
         {
-            var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
-            if (user.token != token && !user.isAdmin)
-                return false;
-            var images = await context.TaskPhotoModels.Where(x => x.id == task_id).ToListAsync();
+            if (token != null)
+            {
+                var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                    u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
+                if (user.token != token && !user.isAdmin)
+                    return false;
+            }
+
+            var images = await context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
             foreach (var image in images)
             {
                 var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
@@ -123,23 +127,23 @@ public class ImageService
         }
     }
 
-    public async Task<List<Image>> GetImageTask(string token, int task_id)
+    public async Task<List<string>> GetImageTask( int task_id,string token = null)
     {
         try
         {
-            var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
-            if (user.token != token && !user.isAdmin)
-                return null;
-            var images = await context.TaskPhotoModels.Where(x => x.id == task_id).ToListAsync();
-            var boxImages = new List<Image>();
+            if (token != null)
+            {
+                var user = await context.UserModels.FirstOrDefaultAsync(u =>
+                    u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+                if (user.token != token && !user.isAdmin)
+                    return null;
+            }
+
+            var images = await context.TaskPhotoModels.Where(x => x.UserTaskId == task_id).ToListAsync();
+            var boxImages = new List<string>();
             foreach (var image in images)
             {
-                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
-                if (File.Exists(filePath))
-                {
-                    boxImages.Add(Image.Load(filePath));
-                }
+                boxImages.Add(image.photoPath);
             }
 
             return boxImages;
@@ -150,19 +154,20 @@ public class ImageService
         }
     }
 
-    public async Task<ImageSetResponse> CheckImageTask()
+    public async Task<ImageSetResponse> CheckImageTask(int userTaskId)
     {
         try
         {
-            var task = await context.UserTaskModels.Where(u => u.task_status == Enums.TaskStatus.OnCheck).FirstOrDefaultAsync();
+            var task = await context.UserTaskModels.Where(u => u.task_status == Enums.TaskStatus.OnCheck && u.id == userTaskId)
+                .FirstOrDefaultAsync();
             if (task == null)
                 return null;
-            task.task_status = Enums.TaskStatus.IsChecking;
+            //task.task_status = Enums.TaskStatus.IsChecking;
             await context.SaveChangesAsync();
-            var images = await GetImageTask("asdf", task.task_id);
+            var images = await GetImageTask(task.task_id);
             var ans = new ImageSetResponse()
             {
-                Images = images,
+                ImagePaths = images,
                 UserTaskId = task.task_id
             };
             return ans;
@@ -174,7 +179,7 @@ public class ImageService
         }
     }
 
-    public async Task<ImageSetResponse> AcceptTask(int task_id,string token)
+    public async Task AcceptTask( /*string token,*/ int task_id)
     {
         try
         {
@@ -185,46 +190,43 @@ public class ImageService
             var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
             userTask.task_status = Enums.TaskStatus.Finished;
             user.points += task.points;
-            var ans = await CheckImageTask();
-            await DeleteImageTask(token, task_id);
+            //var ans = await CheckImageTask();
+            await DeleteImageTask(task_id);
             await context.SaveChangesAsync();
-            await Notificate(userTask.user_id,userTask.task_id,false);
-            return ans;
+            await Notificate(userTask.user_id, userTask.task_id, false);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return null;
         }
     }
-    
-    public async Task<ImageSetResponse> DenyTask(string token,int task_id)
+
+    public async Task DenyTask( /*string token, */ int task_id)
     {
         try
         {
             var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
             userTask.task_status = Enums.TaskStatus.Created;
-            var ans = await CheckImageTask();
-            await DeleteImageTask(token, task_id);
+            //var ans = await CheckImageTask();
+            await DeleteImageTask(task_id);
             await context.SaveChangesAsync();
-            await Notificate(userTask.user_id,userTask.task_id,false);
-            return ans;
+            await Notificate(userTask.user_id, userTask.task_id, false);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return null;
         }
     }
-    
-    private async Task Notificate( int user_id,int task_id,Boolean isAccept)
+
+    private async Task Notificate(int user_id, int task_id, Boolean isAccept)
     {
         try
         {
-            var tokens = await context.NotificationTokensModels.Where(x => x.UserId == user_id).Select(u=>u.Token).ToListAsync();
+            var tokens = await context.NotificationTokensModels.Where(x => x.UserId == user_id).Select(u => u.Token)
+                .ToListAsync();
             var task = await context.TaskModels.FindAsync(task_id);
 
-            await NotificationService.Notify(tokens,isAccept,task.description);
+            await NotificationService.Notify(tokens, isAccept, task.description);
         }
         catch (Exception e)
         {

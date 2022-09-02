@@ -53,7 +53,7 @@ public class ImageController : ControllerBase
     public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest response)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.DeleteImageTask(token,response.task_id);
+        var res = await _imageService.DeleteImageTask(response.task_id,token);
         if (res)
             return Ok();
         return BadRequest();
@@ -64,7 +64,7 @@ public class ImageController : ControllerBase
     public async Task<IActionResult> GetImageTask(GetImageTaskRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.GetImageTask(token,request.task_id);
+        var res = await _imageService.GetImageTask(request.task_id,token);
         if (res != null)
             return Ok(res);
         return BadRequest();

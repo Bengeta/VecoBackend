@@ -21,7 +21,29 @@ public class ApplicationContextSeeder
         _applicationContext.TaskModels.RemoveRange(_applicationContext.TaskModels);
         _applicationContext.UserModels.RemoveRange(_applicationContext.UserModels);
         _applicationContext.UserTaskModels.RemoveRange(_applicationContext.UserTaskModels);
+        _applicationContext.TaskPhotoModels.RemoveRange(_applicationContext.TaskPhotoModels);
         _applicationContext.SaveChanges();
+
+        var photos = new List<TaskPhotoModel>()
+        {
+            new TaskPhotoModel()
+            {
+                UserTaskId = 1,
+                photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
+            },
+            new TaskPhotoModel()
+            {
+                UserTaskId = 1,
+                photoPath = "res/ArcoLinux_2022-03-10_14-25-27.png"
+            },
+            new TaskPhotoModel()
+            {
+                UserTaskId = 1,
+                photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
+            },
+        };
+        _applicationContext.TaskPhotoModels.AddRange(photos);
+
         var tasks = new List<TaskModel>();
         if (!_applicationContext.TaskModels.Any())
         {
@@ -116,6 +138,7 @@ public class ApplicationContextSeeder
                     id = ++i
                 }))
             );
+            users_tasks[0].task_status = TaskStatus.OnCheck;
             _applicationContext.UserTaskModels.AddRange(users_tasks);
         }
 

@@ -4,6 +4,6 @@ namespace VecoBackend.Responses;
 
 public class ImageSetResponse
 {
-    public List<Image> Images { get; set; }
+    public List<string> ImagePaths { get; set; }
     public int UserTaskId { get; set; }
 }
