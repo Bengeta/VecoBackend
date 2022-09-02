@@ -1,0 +1,51 @@
+@using SixLabors.ImageSharp
+@using VecoBackend.Data
+@using VecoBackend.Services
+@inject ApplicationContext applicationContext
+@inject ImageService _imageService
+<h3>TaskCheck</h3>
+<div class="table-responsible">
+<table class="table table-stripped">
+<thead class="thead-light">
+<tr>
+    <th>photo</th>
+</tr>
+</thead>
+<tbody>
+@if (photos == null)
+    {
+        <tr>Loading Data ...</tr>
+    }
+    else
+    {
+    @foreach (var photo in photos)
+    {
+        
+        <tr>
+            <td>
+                <img src="{{photo.photo}}" alt="{{photo.photo}}" width="100" height="100">
+            </td>
+        </tr>
+    }
+    }
+}
+
+}
+</tbody>
+    </table>
+</div>
+
+
+@code {
+    private List<Image> photos { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        _imageService.AddContext(applicationContext);
+        var imageResponse = await _imageService.CheckImageTask();
+        if(imageResponse != null)
+        {
+            photos = imageResponse.Images;
+        }
+    }
+
+}

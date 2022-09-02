@@ -89,8 +89,9 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddCoreAdmin();
 builder.Services.AddSingleton<TaskService>();
 var app = builder.Build();
 
@@ -130,11 +131,10 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-/*
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault()
-});*/
+});
 
 app.UseRouting();
 app.UseAuthentication();
@@ -142,6 +142,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-
+app.MapRazorPages();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
+app.UseCoreAdminCustomUrl("panel");
+app.MapDefaultControllerRoute();
+app.UseCoreAdminCdn("https://my-cdn-root.com");
 app.Run();

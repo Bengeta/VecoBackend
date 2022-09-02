@@ -22,13 +22,13 @@ public class UserController : ControllerBase
     private UserService _userService;
     private JwtSettings _options;
 
-    public UserController(UserService _userService, ApplicationContext _applicationContext,
+    public UserController(UserService userService, ApplicationContext applicationContext,
         IOptions<JwtSettings> options)
     {
-        this._userService = _userService;
-        _userService.AddContext(_applicationContext);
+        _userService = userService;
+        userService.AddContext(applicationContext);
         _options = options.Value;
-        _userService.AddJwtSettings(_options);
+        userService.AddJwtSettings(_options);
     }
 
     [HttpGet("GetToken")]

@@ -27,7 +27,7 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.name == username).FirstAsync();
+            var user = await context.UserModels.Where(x => x.username == username).FirstOrDefaultAsync();
             if (user == null)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
@@ -96,7 +96,7 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.token == token).FirstAsync();
+            var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             return user;
         }
         catch (Exception e)
@@ -110,7 +110,7 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.token == token).FirstAsync();
+            var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             if (user == null)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
@@ -134,7 +134,7 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.token == token).FirstAsync();
+            var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             if (user == null)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
@@ -154,13 +154,17 @@ public class UserService
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.token == token).FirstAsync();
-            var Notification = new NotificationTokensModel()
+            var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            var notification = new NotificationTokensModel()
             {
                 Token = deviceToken,
                 UserId = user.id
             };
-            context.NotificationTokensModels.Add(Notification);
+            context.NotificationTokensModels.Add(notification);
             context.SaveChanges();
             return true;
         }

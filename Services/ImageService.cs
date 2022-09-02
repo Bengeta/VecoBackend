@@ -154,7 +154,7 @@ public class ImageService
     {
         try
         {
-            var task = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_status == Enums.TaskStatus.OnCheck);
+            var task = await context.UserTaskModels.Where(u => u.task_status == Enums.TaskStatus.OnCheck).FirstOrDefaultAsync();
             if (task == null)
                 return null;
             task.task_status = Enums.TaskStatus.IsChecking;
