@@ -6,6 +6,7 @@ using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
 using VecoBackend.Responses;
 using VecoBackend.Services;
+using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Controllers;
 [ApiController]
@@ -20,9 +21,8 @@ public class TaskController : ControllerBase
         taskService.AddContext(_applicationContext);
     }
 
-
-    [HttpPost, Authorize]
-    [Route("task/all")]
+    [HttpGet]
+    [Route("tasks/all")]
     public async Task<IActionResult> GetUserAllTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
@@ -35,17 +35,73 @@ public class TaskController : ControllerBase
         ans.tasks = tasks;
         return Ok(ans);
     }
-    
-    [HttpPost]
-    [Route("task/status_change")]
-    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusRequest request)
+
+    [HttpGet]
+    [Route("tasks/uncompleted")]
+    public async Task<IActionResult> GetUserUncompletedTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var tasks_id = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
-        if(tasks_id == -1)
+        var tasks = await _taskService.GetTasks(token,TaskStatus.Created);
+        if(tasks == null)
         {
             return BadRequest();
         }
-        return Ok(tasks_id);
+        var ans = new TaskListResponse();
+        ans.tasks = tasks;
+        return Ok(ans);
+    }
+    [HttpGet]
+    [Route("tasks/onprogress")]
+    public async Task<IActionResult> GetUserOnProgressTasks()
+    {
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var tasks = await _taskService.GetTasks(token,TaskStatus.OnCheck);
+        if(tasks == null)
+        {
+            return BadRequest();
+        }
+        var ans = new TaskListResponse();
+        ans.tasks = tasks;
+        return Ok(ans);
+    }
+    [HttpGet]
+    [Route("tasks/completed")]
+    public async Task<IActionResult> GetUserCompletedTasks()
+    {
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var tasks = await _taskService.GetTasks(token,TaskStatus.Finished);
+        if(tasks == null)
+        {
+            return BadRequest();
+        }
+        var ans = new TaskListResponse();
+        ans.tasks = tasks;
+        return Ok(ans);
+    }
+    
+    [HttpGet]
+    [Route("tasks/{id}")]
+    public async Task<IActionResult> GetUserTaskById(int id)
+    {
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var task = await _taskService.GetTaskById(id);
+        if(task == null)
+        {
+            return BadRequest();
+        }
+        return Ok(task);
+    }
+    
+    [HttpPut]
+    [Route("status")]
+    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusRequest request)
+    {
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var tasksId = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
+        if(tasksId == -1)
+        {
+            return BadRequest();
+        }
+        return Ok(tasksId);
     }
 }

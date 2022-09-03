@@ -31,7 +31,7 @@ public class UserController : ControllerBase
         userService.AddJwtSettings(_options);
     }
 
-    [HttpGet("GetToken")]
+    [HttpGet("token")]
     [AllowAnonymous]
     public string GetToken()
     {
@@ -71,7 +71,7 @@ public class UserController : ControllerBase
         return BadRequest(ans.Data);
     }
 
-    [HttpGet("getuser")]
+    [HttpGet("user")]
     public async Task<IActionResult> GetUser()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
@@ -81,7 +81,7 @@ public class UserController : ControllerBase
         return BadRequest("User not found");
     }
 
-    [HttpPost("/device/add")]
+    [HttpPost("/device")]
     public async Task<IActionResult> AddDevice(AddTokenDeviceRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
@@ -90,7 +90,7 @@ public class UserController : ControllerBase
             return Ok();
         return BadRequest();
     }
-    [HttpPut("editepassword")]
+    [HttpPut("edite/password")]
     public async Task<IActionResult> EditePassword(EditPasswordRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
@@ -101,7 +101,7 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpPut("/editeusername")]
+    [HttpPut("/edite/username")]
     public async Task<IActionResult> EditeUsername([Bind("User")] EditUsernameRequest request)
     {
         var token = "asdf"; //Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");

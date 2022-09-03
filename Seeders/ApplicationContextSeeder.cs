@@ -138,7 +138,8 @@ public class ApplicationContextSeeder
                     id = ++i
                 }))
             );
-            users_tasks[0].task_status = TaskStatus.OnCheck;
+            users_tasks[^1].task_status = TaskStatus.OnCheck;
+            users_tasks[^2].task_status = TaskStatus.Finished;
             _applicationContext.UserTaskModels.AddRange(users_tasks);
         }
 

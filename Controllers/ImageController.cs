@@ -23,7 +23,7 @@ public class ImageController : ControllerBase
     }
 
     [HttpPost]
-    [Route("upload/box")]
+    [Route("box")]
     public async Task<IActionResult> UploadBoxImage(UploadImageRequest request)
     {
         
@@ -32,39 +32,39 @@ public class ImageController : ControllerBase
     }
 
     [HttpPost]
-    [Route("upload/logo")]
+    [Route("logo")]
     public async Task<IActionResult> UploadLogoImage(UploadImageRequest request)
     {
         return await UploadImage(request, ImageType.Logo);
     }
     [HttpDelete]
-    [Route("delete/id")]
-    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response)
+    [Route("images/{id}")]
+    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response, int imageId)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.DeleteImageById(token,response.task_id,response.image_id);
+        var res = await _imageService.DeleteImageById(token,response.taskId,imageId);
         if (res)
             return Ok();
         return BadRequest();
     }
     
     [HttpDelete]
-    [Route("delete/task")]
-    public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest response)
+    [Route("images/all")]
+    public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.DeleteImageTask(response.task_id,token);
+        var res = await _imageService.DeleteImageTask(request.taskId,token);
         if (res)
             return Ok();
         return BadRequest();
     }
     
-    [HttpPost]
-    [Route("get/task")]
-    public async Task<IActionResult> GetImageTask(GetImageTaskRequest request)
+    [HttpGet]
+    [Route("images/{taskId}")]
+    public async Task<IActionResult> GetImageTask(int taskId)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.GetImageTask(request.task_id,token);
+        var res = await _imageService.GetImageTask(taskId,token);
         if (res != null)
             return Ok(res);
         return BadRequest();
