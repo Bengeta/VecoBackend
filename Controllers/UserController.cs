@@ -55,7 +55,7 @@ public class UserController : ControllerBase
     [HttpPost("auth/signup")]
     public async Task<IActionResult> SignUp(SignUpRequest request)
     {
-        var ans = await _userService.SignUp(request.name, request.username, request.password);
+        var ans = await _userService.SignUp(request.name, request.username, request.password,request.email);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);
