@@ -1,13 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
 using VecoBackend.Models;
 using VecoBackend.Responses;
+using VecoBackend.Utils;
 
 namespace VecoBackend.Services;
 
@@ -27,17 +26,17 @@ public class UserService
         this._options = _options;
     }
 
-    public async Task<ServiseResponse<string>> Login(string username, string password)
+    public async Task<ServiseResponse<string>> Login(string email, string password)
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.username == username).FirstOrDefaultAsync();
+            var user = await context.UserModels.Where(x => x.email == email).FirstOrDefaultAsync();
             if (user == null)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
             }
 
-            var hashedPassword = GenerateHashFromSalt(password, user.salt);
+            var hashedPassword = Hash.GenerateHashFromSalt(password, user.salt);
             if (hashedPassword != user.password)
             {
                 return new ServiseResponse<string>() {success = false, Data = "Password is incorrect"};
@@ -53,20 +52,20 @@ public class UserService
     }
 
 
-    public async Task<ServiseResponse<string>> SignUp(string name, string username, string password,string email)
+    public async Task<ServiseResponse<string>> SignUp(string name, string password, string email)
     {
         try
         {
-            var user = await context.UserModels.Where(x => x.name == username).AnyAsync();
+            var user = await context.UserModels.Where(x => x.email == email).AnyAsync();
             if (user)
             {
                 return new ServiseResponse<string>() {success = false, Data = "User already exists"};
             }
-            var hashAndSalt = GenerateHash(password);
+
+            var hashAndSalt = Hash.GenerateHash(password);
 
             List<Claim> claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, name));
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, username));
             claims.Add(new Claim(ClaimTypes.Email, email));
 
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
@@ -82,7 +81,6 @@ public class UserService
             var newUser = new UserModel()
             {
                 name = name,
-                username = username,
                 password = hashAndSalt.Key,
                 salt = hashAndSalt.Value,
                 token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -110,7 +108,6 @@ public class UserService
             {
                 email = user.email,
                 name = user.name,
-                username = user.username,
                 id = user.id,
                 points = user.points,
                 isAdmin = user.isAdmin
@@ -125,7 +122,7 @@ public class UserService
         }
     }
 
-    public async Task<ServiseResponse<string>> EditePassword(string token, string old_password, string new_password)
+    public async Task<ServiseResponse<string>> EditePassword(string token, string oldPassword, string newPassword)
     {
         try
         {
@@ -134,13 +131,14 @@ public class UserService
             {
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
             }
-            var password = GenerateHashFromSalt(old_password, user.salt);
+
+            var password = Hash.GenerateHashFromSalt(oldPassword, user.salt);
             if (user.password != password)
             {
                 return new ServiseResponse<string>() {success = false, Data = "Old password is incorrect"};
             }
 
-            user.password = GenerateHashFromSalt(new_password, user.salt);
+            user.password = Hash.GenerateHashFromSalt(newPassword, user.salt);
             await context.SaveChangesAsync();
             return new ServiseResponse<string>() {success = true, Data = "Password changed"};
         }
@@ -161,7 +159,7 @@ public class UserService
                 return new ServiseResponse<string>() {success = false, Data = "User not found"};
             }
 
-            user.username = newUsername;
+            user.name = newUsername;
             await context.SaveChangesAsync();
             return new ServiseResponse<string>() {success = true, Data = "Username changed"};
         }
@@ -197,21 +195,4 @@ public class UserService
             return false;
         }
     }
-    
-    
-    private KeyValuePair<string, string> GenerateHash(string s)
-    {
-        var salt = new byte[128 / 8];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(salt);
-        }
-
-        var stringSalt = Convert.ToBase64String(salt);
-        var hash = Convert.ToBase64String(KeyDerivation.Pbkdf2(s, salt, KeyDerivationPrf.HMACSHA1, 1000, 256 / 8));
-        return new KeyValuePair<string, string>(hash, stringSalt);
-    }
-
-    private static string GenerateHashFromSalt(string s, string strSalt) => Convert.ToBase64String(
-        KeyDerivation.Pbkdf2(s, Convert.FromBase64String(strSalt), KeyDerivationPrf.HMACSHA1, 1000, 256 / 8));
 }

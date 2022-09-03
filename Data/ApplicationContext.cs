@@ -21,6 +21,8 @@ public class ApplicationContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<UserModel>().HasIndex(u => u.email).IsUnique();
+        modelBuilder.Entity<UserModel>().HasIndex(u => u.token).IsUnique();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

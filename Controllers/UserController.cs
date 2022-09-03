@@ -55,7 +55,7 @@ public class UserController : ControllerBase
     [HttpPost("auth/signup")]
     public async Task<IActionResult> SignUp(SignUpRequest request)
     {
-        var ans = await _userService.SignUp(request.name, request.username, request.password,request.email);
+        var ans = await _userService.SignUp(request.name, request.password,request.email);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);
@@ -65,7 +65,7 @@ public class UserController : ControllerBase
     [HttpPost("auth/login")]
     public async Task<IActionResult> Login(LoginRequest loginRequest)
     {
-        var ans = await _userService.Login(loginRequest.username, loginRequest.password);
+        var ans = await _userService.Login(loginRequest.email, loginRequest.password);
         if (ans.success)
             return Ok(ans.Data);
         return BadRequest(ans.Data);

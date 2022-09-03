@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
+using VecoBackend.Utils;
 using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Seeders;
@@ -81,10 +82,9 @@ public class ApplicationContextSeeder
                 name = "Иван Иванов",
                 isAdmin = false,
                 token = "asdw",
-                username = "ivanov",
                 password = "asdf",
                 salt = "asdf",
-                email = "asd@"
+                email = "assdfd@"
             });
             users.Add(new UserModel()
             {
@@ -92,26 +92,25 @@ public class ApplicationContextSeeder
                 name = "Илья Ильин",
                 isAdmin = false,
                 token = "asdq",
-                username = "ilin",
                 password = "asd",
                 salt = "asdf",
                 email = "asd@"
             });
+            var pas = Hash.GenerateHash("asdf");
             users.Add(new UserModel()
             {
                 id = 3,
                 name = "Руслан Гасанов",
                 isAdmin = true,
                 token = "asdf",
-                username = "gsanov",
-                password = "asdf",
-                salt = "asdf",
-                email = "asd@"
+                password = pas.Key,
+                salt = pas.Value,
+                email = "gsanov@"
             });
+            
              List<Claim> claims = new List<Claim>();
              claims.Add(new Claim(ClaimTypes.Name, users[2].name));
-             claims.Add(new Claim(ClaimTypes.NameIdentifier, users[2].username));
-             //claims.Add(new Claim(ClaimTypes.Email, email));
+             claims.Add(new Claim(ClaimTypes.Email, users[2].email));
             
              var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
             
