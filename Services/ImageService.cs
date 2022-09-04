@@ -78,7 +78,7 @@ public class ImageService
                 await (from usr in _context.UserModels
                     join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
                     join task in _context.TaskModels on userTask.task_id equals task.id
-                    join photos in _context.TaskPhotoModels on userTask.id equals photos.UserTaskId 
+                    join photos in _context.TaskPhotoModels on userTask.id equals photos.UserTaskId
                     where (usr.token == token || usr.isAdmin) && task.id == taskId && photos.id == imageId
                     select photos).FirstOrDefaultAsync();
             if (img == null)
@@ -96,19 +96,17 @@ public class ImageService
         }
     }
 
-    public async Task<Boolean> DeleteImageTask(int taskId, string token = null)
+    public async Task<Boolean> DeleteImageTask(int taskId, string token = "asdf")
     {
         try
         {
-            if (token != null)
-            {
-                var user = await _context.UserModels.FirstOrDefaultAsync(u =>
-                    u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
-                if (user.token != token && !user.isAdmin)
-                    return false;
-            }
-
-            var images = await _context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
+            var images =
+                await (from usr in _context.UserModels
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
+                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    join photos in _context.TaskPhotoModels on userTask.id equals photos.UserTaskId
+                    where (usr.token == token || usr.isAdmin) && task.id == taskId
+                    select photos).ToListAsync();
             foreach (var image in images)
             {
                 var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
@@ -126,19 +124,17 @@ public class ImageService
         }
     }
 
-    public async Task<List<string>> GetImageTask(int taskId, string token = null)
+    public async Task<List<string>> GetImageTask(int taskId, string token = "asdf")
     {
         try
         {
-            if (token != null)
-            {
-                var user = await _context.UserModels.FirstOrDefaultAsync(u =>
-                    u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
-                if (user.token != token && !user.isAdmin)
-                    return null;
-            }
-
-            var images = await _context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
+            var images =
+                await (from usr in _context.UserModels
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
+                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    join photos in _context.TaskPhotoModels on userTask.id equals photos.UserTaskId
+                    where (usr.token == token || usr.isAdmin) && task.id == taskId
+                    select photos).ToListAsync();
             var boxImages = new List<string>();
             foreach (var image in images)
             {

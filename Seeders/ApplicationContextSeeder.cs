@@ -29,17 +29,17 @@ public class ApplicationContextSeeder
         {
             new TaskPhotoModel()
             {
-                UserTaskId = 1,
+                UserTaskId = 7,
                 photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
             },
             new TaskPhotoModel()
             {
-                UserTaskId = 1,
+                UserTaskId = 7,
                 photoPath = "res/ArcoLinux_2022-03-10_14-25-27.png"
             },
             new TaskPhotoModel()
             {
-                UserTaskId = 1,
+                UserTaskId = 7,
                 photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
             },
         };
@@ -90,8 +90,8 @@ public class ApplicationContextSeeder
             {
                 id = 2,
                 name = "Илья Ильин",
-                isAdmin = false,
-                token = "asdq",
+                isAdmin = true,
+                token = "asdf",
                 password = "asd",
                 salt = "asdf",
                 email = "asd@"

@@ -4,6 +4,7 @@ using Microsoft.Net.Http.Headers;
 using SixLabors.ImageSharp;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Requests;
 using VecoBackend.Responses;
 using VecoBackend.Services;
 
@@ -39,10 +40,10 @@ public class ImageController : ControllerBase
 
     [HttpDelete]
     [Route("images/{id}")]
-    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response, int imageId)
+    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response, int id)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await _imageService.DeleteImageById(token, response.taskId, imageId);
+        var res = await _imageService.DeleteImageById(token, response.taskId, id);
         if (res)
             return Ok();
         return BadRequest();
@@ -78,7 +79,7 @@ public class ImageController : ControllerBase
 
         try
         {
-            var imgId = await _imageService.SaveImage(request.file, request.task_id, type, token);
+            var imgId = await _imageService.SaveImage(request.file, request.TaskId, type, token);
             if (imgId != -1)
                 return Ok(imgId);
             return BadRequest();
