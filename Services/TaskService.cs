@@ -55,7 +55,8 @@ public class TaskService
             throw;
         }
     }
-    public async Task<List<TaskModel>> GetTasks(string token,TaskStatus status)
+
+    public async Task<List<TaskModel>> GetTasks(string token, TaskStatus status)
     {
         try
         {
@@ -93,23 +94,26 @@ public class TaskService
         }
     }
 
-    public async Task<int> ChangeTaskStatus(string token, TaskStatus newStatus, int taskId)
+    public async Task<bool> ChangeTaskStatus(string token, TaskStatus newStatus, int taskId)
     {
         try
         {
-            var user = await _context.UserModels.FirstOrDefaultAsync(u => u.token == token);
-            if (user == null) return -1;
-            var userTask =
-                await _context.UserTaskModels.FirstOrDefaultAsync(ut => ut.user_id == user.id && ut.task_id == taskId);
-            if (userTask == null) return -1;
-            userTask.task_status = newStatus;
+            var UserTask =
+                await (from user in _context.UserModels
+                    join userTask in _context.UserTaskModels on user.id equals userTask.user_id
+                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    where user.token == token && task.id == taskId
+                    select userTask).FirstOrDefaultAsync();
+            if (UserTask == null)
+                return false;
+            UserTask.task_status = newStatus;
             await _context.SaveChangesAsync();
-            return userTask.id;
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return -1;
+            return false;
         }
     }
 
@@ -156,7 +160,6 @@ public class TaskService
         {
             var task = await _context.TaskModels.Where(u => u.id == id).FirstOrDefaultAsync();
             return task;
-
         }
         catch (Exception e)
         {
