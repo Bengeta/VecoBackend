@@ -15,26 +15,23 @@ public class ImageService
 {
     private readonly IEnumerable<IImageProfile> _imageProfiles;
     private readonly IWebHostEnvironment _hostingEnvironment;
-    private readonly string _connectionString;
-    private ApplicationContext context;
-    private NotificationService notificationService;
+    private ApplicationContext _context;
+    private NotificationService _notificationService;
 
     public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
-        IConfiguration configuration, NotificationService notificationService)
+        NotificationService notificationService)
     {
-        _connectionString = configuration.GetConnectionString("MainDB");
-        if (_connectionString == null) throw new Exception("Connection string not specified");
         _imageProfiles = imageProfiles;
         _hostingEnvironment = webHostEnvironment;
-        this.notificationService = notificationService;
+        this._notificationService = notificationService;
     }
 
-    public void AddContext(ApplicationContext _applicationContext)
+    public void AddContext(ApplicationContext applicationContext)
     {
-        context = _applicationContext;
+        _context = applicationContext;
     }
 
-    public async Task<string> SaveImage(IFormFile file, int task_id, ImageType imageType)
+    public async Task<int> SaveImage(IFormFile file, int taskId, ImageType imageType, string token)
     {
         var imageProfile = _imageProfiles.FirstOrDefault(profile =>
             profile.ImageType == imageType);
@@ -68,27 +65,29 @@ public class ImageService
         image.Save(filePath, new JpegEncoder {Quality = 75});
 
         var fileUrl = Path.Combine(imageProfile.Folder, fileName);
-        await SaveImageToDB(fileUrl, task_id);
-        return fileUrl;
+        var imgId = await SaveImageToDb(fileUrl, taskId, token);
+        return imgId;
     }
 
 
-    public async Task<Boolean> DeleteImageById(string token, int task_id, int image_id)
+    public async Task<Boolean> DeleteImageById(string token, int taskId, int imageId)
     {
         try
         {
-            var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
-            if (user.token != token && !user.isAdmin)
+            var img =
+                await (from usr in _context.UserModels
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
+                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    join photos in _context.TaskPhotoModels on userTask.id equals photos.UserTaskId 
+                    where (usr.token == token || usr.isAdmin) && task.id == taskId && photos.id == imageId
+                    select photos).FirstOrDefaultAsync();
+            if (img == null)
                 return false;
-            var image = await context.TaskPhotoModels.FindAsync(image_id);
-            if (image == null)
-                return false;
-            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, img.photoPath);
             if (File.Exists(filePath))
                 File.Delete(filePath);
-            context.TaskPhotoModels.Remove(image);
-            await context.SaveChangesAsync();
+            _context.TaskPhotoModels.Remove(img);
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception e)
@@ -103,13 +102,13 @@ public class ImageService
         {
             if (token != null)
             {
-                var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                    u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
+                var user = await _context.UserModels.FirstOrDefaultAsync(u =>
+                    u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
                 if (user.token != token && !user.isAdmin)
                     return false;
             }
 
-            var images = await context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
+            var images = await _context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
             foreach (var image in images)
             {
                 var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.photoPath);
@@ -117,8 +116,8 @@ public class ImageService
                     File.Delete(filePath);
             }
 
-            context.TaskPhotoModels.RemoveRange(images);
-            await context.SaveChangesAsync();
+            _context.TaskPhotoModels.RemoveRange(images);
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception e)
@@ -127,19 +126,19 @@ public class ImageService
         }
     }
 
-    public async Task<List<string>> GetImageTask( int task_id,string token = null)
+    public async Task<List<string>> GetImageTask(int taskId, string token = null)
     {
         try
         {
             if (token != null)
             {
-                var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                    u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
+                var user = await _context.UserModels.FirstOrDefaultAsync(u =>
+                    u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
                 if (user.token != token && !user.isAdmin)
                     return null;
             }
 
-            var images = await context.TaskPhotoModels.Where(x => x.UserTaskId == task_id).ToListAsync();
+            var images = await _context.TaskPhotoModels.Where(x => x.UserTaskId == taskId).ToListAsync();
             var boxImages = new List<string>();
             foreach (var image in images)
             {
@@ -158,12 +157,13 @@ public class ImageService
     {
         try
         {
-            var task = await context.UserTaskModels.Where(u => u.task_status == Enums.TaskStatus.OnCheck && u.id == userTaskId)
+            var task = await _context.UserTaskModels
+                .Where(u => u.task_status == Enums.TaskStatus.OnCheck && u.id == userTaskId)
                 .FirstOrDefaultAsync();
             if (task == null)
                 return null;
             //task.task_status = Enums.TaskStatus.IsChecking;
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             var images = await GetImageTask(task.task_id);
             var ans = new ImageSetResponse()
             {
@@ -179,20 +179,20 @@ public class ImageService
         }
     }
 
-    public async Task AcceptTask( /*string token,*/ int task_id)
+    public async Task AcceptTask( /*string token,*/ int taskId)
     {
         try
         {
-            var user = await context.UserModels.FirstOrDefaultAsync(u =>
-                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.user_id);
-            var task = await context.TaskModels.FirstOrDefaultAsync(u =>
-                u.id == context.UserTaskModels.FirstOrDefault(ut => ut.task_id == task_id)!.task_id);
-            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
+            var user = await _context.UserModels.FirstOrDefaultAsync(u =>
+                u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.user_id);
+            var task = await _context.TaskModels.FirstOrDefaultAsync(u =>
+                u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.task_id == taskId)!.task_id);
+            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == taskId);
             userTask.task_status = Enums.TaskStatus.Finished;
             user.points += task.points;
             //var ans = await CheckImageTask();
-            await DeleteImageTask(task_id);
-            await context.SaveChangesAsync();
+            await DeleteImageTask(taskId);
+            await _context.SaveChangesAsync();
             await Notificate(userTask.user_id, userTask.task_id, false);
         }
         catch (Exception e)
@@ -201,16 +201,19 @@ public class ImageService
         }
     }
 
-    public async Task DenyTask( /*string token, */ int task_id)
+    public async Task DenyTask( /*string token, */ int taskId)
     {
         try
         {
-            var userTask = await context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == task_id);
-            userTask.task_status = Enums.TaskStatus.Created;
-            //var ans = await CheckImageTask();
-            await DeleteImageTask(task_id);
-            await context.SaveChangesAsync();
-            await Notificate(userTask.user_id, userTask.task_id, false);
+            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.task_id == taskId);
+            if (userTask != null)
+            {
+                userTask.task_status = Enums.TaskStatus.Created;
+                //var ans = await CheckImageTask();
+                await DeleteImageTask(taskId);
+                await _context.SaveChangesAsync();
+                await Notificate(userTask.user_id, userTask.task_id, false);
+            }
         }
         catch (Exception e)
         {
@@ -218,13 +221,13 @@ public class ImageService
         }
     }
 
-    private async Task Notificate(int user_id, int task_id, Boolean isAccept)
+    private async Task Notificate(int userId, int taskId, Boolean isAccept)
     {
         try
         {
-            var tokens = await context.NotificationTokensModels.Where(x => x.UserId == user_id).Select(u => u.Token)
+            var tokens = await _context.NotificationTokensModels.Where(x => x.UserId == userId).Select(u => u.Token)
                 .ToListAsync();
-            var task = await context.TaskModels.FindAsync(task_id);
+            var task = await _context.TaskModels.FindAsync(taskId);
 
             await NotificationService.Notify(tokens, isAccept, task.description);
         }
@@ -294,23 +297,29 @@ public class ImageService
     }
 
 
-    private async Task<Boolean> SaveImageToDB(string filePath, int task_id)
+    private async Task<int> SaveImageToDb(string filePath, int taskId, string token)
     {
         try
         {
+            var userTaskId =
+                await (from user in _context.UserModels
+                    join userTask in _context.UserTaskModels on user.id equals userTask.user_id
+                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    where user.token == token && task.id == taskId
+                    select userTask.id).FirstOrDefaultAsync();
             var image = new TaskPhotoModel()
             {
                 photoPath = filePath,
-                UserTaskId = task_id
+                UserTaskId = userTaskId
             };
-            context.TaskPhotoModels.Add(image);
-            await context.SaveChangesAsync();
-            return true;
+            _context.TaskPhotoModels.Add(image);
+            await _context.SaveChangesAsync();
+            return image.id;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return false;
+            return -1;
         }
     }
 }
