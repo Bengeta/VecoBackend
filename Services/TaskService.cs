@@ -35,6 +35,7 @@ public class TaskService
                     type = task.type,
                     isSeen = task.isSeen,
                     deadline = task.deadline,
+                    status = userTask.task_status
                 }).ToListAsync();
             var answer = new List<TaskModel>();
             tasks.ForEach(task =>
@@ -47,6 +48,7 @@ public class TaskService
                     type = task.type,
                     isSeen = task.isSeen,
                     deadline = task.deadline,
+                    status = task.status
                 });
             });
 

@@ -14,7 +14,8 @@ using VecoBackend.Seeders;
 using VecoBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var secretKey = builder.Configuration.GetSection("JwtSettings:SecretKey").Value;
 var issuer = builder.Configuration.GetSection("JwtSettings:Issuer").Value;
