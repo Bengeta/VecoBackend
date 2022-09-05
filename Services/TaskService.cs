@@ -33,7 +33,8 @@ public class TaskService
                     points = task.points,
                     description = task.description,
                     type = task.type,
-                    isSeen = task.isSeen
+                    isSeen = task.isSeen,
+                    deadline = task.deadline,
                 }).ToListAsync();
             var answer = new List<TaskModel>();
             tasks.ForEach(task =>
@@ -44,7 +45,8 @@ public class TaskService
                     points = task.points,
                     description = task.description,
                     type = task.type,
-                    isSeen = task.isSeen
+                    isSeen = task.isSeen,
+                    deadline = task.deadline,
                 });
             });
 
@@ -71,7 +73,8 @@ public class TaskService
                     points = task.points,
                     description = task.description,
                     type = task.type,
-                    isSeen = task.isSeen
+                    isSeen = task.isSeen,
+                    deadline = task.deadline,
                 }).ToListAsync();
             var answer = new List<TaskModel>();
             tasks.ForEach(task =>
@@ -82,7 +85,8 @@ public class TaskService
                     points = task.points,
                     description = task.description,
                     type = task.type,
-                    isSeen = task.isSeen
+                    isSeen = task.isSeen,
+                    deadline = task.deadline,
                 });
             });
 
@@ -132,7 +136,7 @@ public class TaskService
                     points = task.points,
                     description = task.description,
                     type = task.type,
-                    name = user.name
+                    name = user.name,
                 }).ToListAsync();
             var answer = new List<CheckTaskListResponse>();
             foreach (var task in tasks)

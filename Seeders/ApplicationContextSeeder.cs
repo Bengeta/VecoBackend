@@ -54,20 +54,23 @@ public class ApplicationContextSeeder
                 points = 200,
                 description = "Сходить в магазин с собственной сумкой",
                 type = TaskType.Day,
+                deadline = DateTime.Today.AddDays(1)
             });
             tasks.Add(new TaskModel()
             {
                 id = 2,
                 points = 800,
                 description = "Сдать свой недельный мусор в пункт переработки",
-                type = TaskType.Week
+                type = TaskType.Week,
+                deadline = DateTime.Today.AddDays(7)
             });
             tasks.Add(new TaskModel()
             {
                 id = 3,
                 points = 2500,
                 description = "Провести уборку в парке своего района",
-                type = TaskType.Month
+                type = TaskType.Month,
+                deadline = DateTime.Today.AddMonths(1),
             });
             _applicationContext.TaskModels.AddRange(tasks);
         }

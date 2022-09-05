@@ -23,6 +23,7 @@ public class ApplicationContext : DbContext
     {
         modelBuilder.Entity<UserModel>().HasIndex(u => u.email).IsUnique();
         modelBuilder.Entity<UserModel>().HasIndex(u => u.token).IsUnique();
+        modelBuilder.Entity<TaskModel>().Property(t => t.deadline).HasColumnType("datetime2");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
