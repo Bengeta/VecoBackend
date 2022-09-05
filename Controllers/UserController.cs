@@ -53,61 +53,44 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("auth/signup")]
-    public async Task<IActionResult> SignUp(SignUpRequest request)
+    public async Task<ResponseModel<string>> SignUp(SignUpRequest request)
     {
-        var ans = await _userService.SignUp(request.name, request.password,request.email);
-        if (ans.success)
-            return Ok(ans.Data);
-        return BadRequest(ans.Data);
+        return await _userService.SignUp(request.name, request.password, request.email);
     }
 
     [AllowAnonymous]
     [HttpPost("auth/login")]
-    public async Task<IActionResult> Login(LoginRequest loginRequest)
+    public async Task<ResponseModel<string>> Login(LoginRequest loginRequest)
     {
-        var ans = await _userService.Login(loginRequest.email, loginRequest.password);
-        if (ans.success)
-            return Ok(ans.Data);
-        return BadRequest(ans.Data);
+        return await _userService.Login(loginRequest.email, loginRequest.password);
     }
 
     [HttpGet("user")]
-    public async Task<IActionResult> GetUser()
+    public async Task<ResponseModel<UserModelResponse>> GetUser()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.GetUser(token);
-        if (ans != null)
-            return Ok(ans);
-        return BadRequest("User not found");
+        return await _userService.GetUser(token);
     }
 
     [HttpPost("/device")]
-    public async Task<IActionResult> AddDevice(AddTokenDeviceRequest request)
+    public async Task<ResponseModel<string>> AddDevice(AddTokenDeviceRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.AddDevice(token, request.deviceToken);
-        if (ans)
-            return Ok();
-        return BadRequest();
+        return await _userService.AddDevice(token, request.DeviceToken);
     }
+
     [HttpPut("edite/password")]
-    public async Task<IActionResult> EditePassword(EditPasswordRequest request)
+    public async Task<ResponseModel<string>> EditePassword(EditPasswordRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.EditePassword(token, request.old_password, request.new_password);
-        if (ans.success)
-            return Ok(ans.Data);
-        return BadRequest(ans.Data);
+        return await _userService.EditePassword(token, request.old_password, request.new_password);
     }
 
 
     [HttpPut("/edite/username")]
-    public async Task<IActionResult> EditeUsername([Bind("User")] EditUsernameRequest request)
+    public async Task<ResponseModel<string>> EditeUsername([Bind("User")] EditUsernameRequest request)
     {
-        var token = "asdf"; //Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var ans = await _userService.EditeUsername(token, request.new_username);
-        if (ans.success)
-            return Ok(ans.Data);
-        return BadRequest(ans.Data);
+        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        return await _userService.EditeUsername(token, request.new_username);
     }
 }

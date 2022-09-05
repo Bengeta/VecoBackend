@@ -4,6 +4,7 @@ using Microsoft.Net.Http.Headers;
 using SixLabors.ImageSharp;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Models;
 using VecoBackend.Requests;
 using VecoBackend.Responses;
 using VecoBackend.Services;
@@ -24,7 +25,7 @@ public class ImageController : ControllerBase
 
     [HttpPost]
     [Route("box")]
-    public async Task<IActionResult> UploadBoxImage(UploadImageRequest request)
+    public async Task<ResponseModel<int>> UploadBoxImage(UploadImageRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         return await UploadImage(request, ImageType.Box, token);
@@ -32,7 +33,7 @@ public class ImageController : ControllerBase
 
     [HttpPost]
     [Route("logo")]
-    public async Task<IActionResult> UploadLogoImage(UploadImageRequest request)
+    public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         return await UploadImage(request, ImageType.Logo, token);
@@ -40,57 +41,53 @@ public class ImageController : ControllerBase
 
     [HttpDelete]
     [Route("images/{id}")]
-    public async Task<IActionResult> DeleteImageById(DeleteImageRequest response, int id)
+    public async Task<ResponseModel<string>> DeleteImageById(DeleteImageRequest response, int id)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.DeleteImageById(token, response.taskId, id);
-        if (res)
-            return Ok();
-        return BadRequest();
+        var answer = new ResponseModel<string>() {ResultCode = res};
+        return answer;
     }
 
     [HttpDelete]
     [Route("images/all")]
-    public async Task<IActionResult> DeleteImageTask(DeleteTaskImageRequest request)
+    public async Task<ResponseModel<string>> DeleteImageTask(DeleteTaskImageRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.DeleteImageTask(request.taskId, token);
-        if (res)
-            return Ok();
-        return BadRequest();
+        var answer = new ResponseModel<string>() {ResultCode = res};
+        return answer;
     }
 
     [HttpGet]
     [Route("images/{taskId}")]
-    public async Task<IActionResult> GetImageTask(int taskId)
+    public async Task<ResponseModel<List<string>>> GetImageTask(int taskId)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var res = await _imageService.GetImageTask(taskId, token);
         if (res != null)
-            return Ok(res);
-        return BadRequest();
+            return new ResponseModel<List<string>>(){ResultCode = ResultCode.Success, Data = res};
+        return new ResponseModel<List<string>>(){ResultCode = ResultCode.Failed};
     }
 
 
-    private async Task<IActionResult> UploadImage(UploadImageRequest request, ImageType type, string token)
+    private async Task<ResponseModel<int>> UploadImage(UploadImageRequest request, ImageType type, string token)
     {
         if (request.file.Length == 0)
-            return BadRequest("File is empty");
+            return new ResponseModel<int>() {ResultCode = ResultCode.FileIsEmpty};
 
         try
         {
-            var imgId = await _imageService.SaveImage(request.file, request.TaskId, type, token);
-            if (imgId != -1)
-                return Ok(imgId);
-            return BadRequest();
+          return await _imageService.SaveImage(request.file, request.TaskId, type, token);
+            
         }
         catch (ImageProcessingException ex)
         {
-            return BadRequest(ex.Message);
+            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
         }
         catch (Exception ex)
         {
-            return Ok(ex.Message);
+            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
         }
     }
 }

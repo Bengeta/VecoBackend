@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
+using VecoBackend.Enums;
 using VecoBackend.Models;
 using VecoBackend.Responses;
 using VecoBackend.Utils;
@@ -26,44 +27,37 @@ public class UserService
         this._options = _options;
     }
 
-    public async Task<ServiseResponse<string>> Login(string email, string password)
+    public async Task<ResponseModel<string>> Login(string email, string password)
     {
         try
         {
             var user = await context.UserModels.Where(x => x.email == email).FirstOrDefaultAsync();
             if (user == null)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "User not found"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.UserNotFound};
 
             var hashedPassword = Hash.GenerateHashFromSalt(password, user.salt);
             if (hashedPassword != user.password)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "Password is incorrect"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.PasswordIncorrect};
 
-            return new ServiseResponse<string>() {success = true, Data = user.token};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Success, Data = user.token};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ServiseResponse<string>() {success = false, Data = "Something went wrong"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Failed};
         }
     }
 
 
-    public async Task<ServiseResponse<string>> SignUp(string name, string password, string email)
+    public async Task<ResponseModel<string>> SignUp(string name, string password, string email)
     {
         try
         {
             var user = await context.UserModels.Where(x => x.email == email).AnyAsync();
             if (user)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "User already exists"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.UserAlreadyExists};
 
             var hashAndSalt = Hash.GenerateHash(password);
-
             List<Claim> claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, name));
             claims.Add(new Claim(ClaimTypes.Email, email));
@@ -88,16 +82,16 @@ public class UserService
             };
             context.UserModels.Add(newUser);
             await context.SaveChangesAsync();
-            return new ServiseResponse<string>() {success = true, Data = newUser.token};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Success, Data = newUser.token};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ServiseResponse<string>() {success = false, Data = "Something went wrong"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Failed};
         }
     }
 
-    public async Task<UserModelResponse> GetUser(string token)
+    public async Task<ResponseModel<UserModelResponse>> GetUser(string token)
     {
         try
         {
@@ -113,72 +107,64 @@ public class UserService
                 isAdmin = user.isAdmin
             };
 
-            return ans;
+            return new ResponseModel<UserModelResponse>() {ResultCode = ResultCode.Success, Data = ans};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return null;
+            return new ResponseModel<UserModelResponse>() {ResultCode = ResultCode.Failed};
         }
     }
 
-    public async Task<ServiseResponse<string>> EditePassword(string token, string oldPassword, string newPassword)
+    public async Task<ResponseModel<string>> EditePassword(string token, string oldPassword, string newPassword)
     {
         try
         {
             var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             if (user == null)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "User not found"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.UserNotFound};
 
             var password = Hash.GenerateHashFromSalt(oldPassword, user.salt);
             if (user.password != password)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "Old password is incorrect"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.PasswordIncorrect};
 
             user.password = Hash.GenerateHashFromSalt(newPassword, user.salt);
             await context.SaveChangesAsync();
-            return new ServiseResponse<string>() {success = true, Data = "Password changed"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Success};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ServiseResponse<string>() {success = false, Data = "Something went wrong"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Failed};
         }
     }
 
-    public async Task<ServiseResponse<string>> EditeUsername(string token, string newUsername)
+    public async Task<ResponseModel<string>> EditeUsername(string token, string newUsername)
     {
         try
         {
             var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             if (user == null)
-            {
-                return new ServiseResponse<string>() {success = false, Data = "User not found"};
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.UserNotFound};
 
             user.name = newUsername;
             await context.SaveChangesAsync();
-            return new ServiseResponse<string>() {success = true, Data = "Username changed"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Success};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ServiseResponse<string>() {success = false, Data = "Something went wrong"};
+            return new ResponseModel<string>() {ResultCode = ResultCode.Failed};
         }
     }
 
-    public async Task<Boolean> AddDevice(string token, string deviceToken)
+    public async Task<ResponseModel<string>> AddDevice(string token, string deviceToken)
     {
         try
         {
             var user = await context.UserModels.Where(x => x.token == token).FirstOrDefaultAsync();
             if (user == null)
-            {
-                return false;
-            }
+                return new ResponseModel<string>() {ResultCode = ResultCode.UserNotFound};
 
             var notification = new NotificationTokensModel()
             {
@@ -187,12 +173,12 @@ public class UserService
             };
             context.NotificationTokensModels.Add(notification);
             context.SaveChanges();
-            return true;
+            return new ResponseModel<string>() {ResultCode = ResultCode.Success};
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return false;
+            return new ResponseModel<string>() {ResultCode = ResultCode.Failed};
         }
     }
 }

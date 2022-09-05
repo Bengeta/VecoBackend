@@ -31,13 +31,13 @@ public class ImageService
         _context = applicationContext;
     }
 
-    public async Task<int> SaveImage(IFormFile file, int taskId, ImageType imageType, string token)
+    public async Task<ResponseModel<int>> SaveImage(IFormFile file, int taskId, ImageType imageType, string token)
     {
         var imageProfile = _imageProfiles.FirstOrDefault(profile =>
             profile.ImageType == imageType);
 
         if (imageProfile == null)
-            throw new ImageProcessingException("Image profile has not found");
+            return new ResponseModel<int> {ResultCode = ResultCode.ImageProfileHasNotFound};
 
         ValidateExtension(file, imageProfile);
         ValidateFileSize(file, imageProfile);
@@ -66,11 +66,13 @@ public class ImageService
 
         var fileUrl = Path.Combine(imageProfile.Folder, fileName);
         var imgId = await SaveImageToDb(fileUrl, taskId, token);
-        return imgId;
+        if (imgId > -1)
+            return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
+        return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
     }
 
 
-    public async Task<Boolean> DeleteImageById(string token, int taskId, int imageId)
+    public async Task<ResultCode> DeleteImageById(string token, int taskId, int imageId)
     {
         try
         {
@@ -82,21 +84,21 @@ public class ImageService
                     where (usr.token == token || usr.isAdmin) && task.id == taskId && photos.id == imageId
                     select photos).FirstOrDefaultAsync();
             if (img == null)
-                return false;
+                return ResultCode.Failed;
             var filePath = Path.Combine(_hostingEnvironment.WebRootPath, img.photoPath);
             if (File.Exists(filePath))
                 File.Delete(filePath);
             _context.TaskPhotoModels.Remove(img);
             await _context.SaveChangesAsync();
-            return true;
+            return ResultCode.Success;
         }
         catch (Exception e)
         {
-            return false;
+            return ResultCode.Failed;
         }
     }
 
-    public async Task<Boolean> DeleteImageTask(int taskId, string token = "asdf")
+    public async Task<ResultCode> DeleteImageTask(int taskId, string token = "asdf")
     {
         try
         {
@@ -116,11 +118,11 @@ public class ImageService
 
             _context.TaskPhotoModels.RemoveRange(images);
             await _context.SaveChangesAsync();
-            return true;
+            return ResultCode.Success;
         }
         catch (Exception e)
         {
-            return false;
+            return ResultCode.Failed;
         }
     }
 

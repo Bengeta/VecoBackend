@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
+using VecoBackend.Enums;
+using VecoBackend.Models;
 using VecoBackend.Responses;
 using VecoBackend.Services;
 using TaskStatus = VecoBackend.Enums.TaskStatus;
@@ -24,79 +26,64 @@ public class TaskController : ControllerBase
 
     [HttpGet]
     [Route("tasks/all")]
-    public async Task<IActionResult> GetUserAllTasks()
+    public async Task<ResponseModel<List<TaskModel>>> GetUserAllTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetAllTasks(token);
         if (tasks == null)
-            return BadRequest();
-        
-        var ans = new TaskListResponse();
-        ans.tasks = tasks;
-        return Ok(ans);
+            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/uncompleted")]
-    public async Task<IActionResult> GetUserUncompletedTasks()
+    public async Task<ResponseModel<List<TaskModel>>> GetUserUncompletedTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetTasks(token, TaskStatus.Created);
         if (tasks == null)
-            return BadRequest();
-
-        var ans = new TaskListResponse();
-        ans.tasks = tasks;
-        return Ok(ans);
+            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/onprogress")]
-    public async Task<IActionResult> GetUserOnProgressTasks()
+    public async Task<ResponseModel<List<TaskModel>>> GetUserOnProgressTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetTasks(token, TaskStatus.OnCheck);
         if (tasks == null)
-            return BadRequest();
-
-        var ans = new TaskListResponse();
-        ans.tasks = tasks;
-        return Ok(ans);
+            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/completed")]
-    public async Task<IActionResult> GetUserCompletedTasks()
+    public async Task<ResponseModel<List<TaskModel>>> GetUserCompletedTasks()
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var tasks = await _taskService.GetTasks(token, TaskStatus.Finished);
         if (tasks == null)
-            return BadRequest();
-
-        var ans = new TaskListResponse();
-        ans.tasks = tasks;
-        return Ok(ans);
+            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/{id}")]
-    public async Task<IActionResult> GetUserTaskById(int id)
+    public async Task<ResponseModel<TaskModel>> GetUserTaskById(int id)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
         var task = await _taskService.GetTaskById(id);
         if (task == null)
-            return BadRequest();
-        return Ok(task);
+            return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Success, Data = task};
     }
 
     [HttpPut]
-    [Route("status")]
-    public async Task<IActionResult> ChangeTaskStatus(ChangeTaskStatusRequest request)
+    [Route("task/status")]
+    public async Task<ResponseModel<int>> ChangeTaskStatus(ChangeTaskStatusRequest request)
     {
         var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var tasksId = await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
-        if (tasksId)
-            return BadRequest();
-        return Ok();
+        return await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
     }
 }
