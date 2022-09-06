@@ -24,6 +24,7 @@ public class ImageController : ControllerBase
 
     [HttpPost]
     [Route("box")]
+    [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadBoxImage(UploadImageRequest request)
     {
         var token = HttpContext.Items["Token"].ToString();
@@ -32,6 +33,7 @@ public class ImageController : ControllerBase
 
     [HttpPost]
     [Route("logo")]
+    [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
         var token = HttpContext.Items["Token"].ToString();
