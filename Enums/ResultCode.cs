@@ -7,8 +7,7 @@ public enum ResultCode
     UserNotFound,
     PasswordIncorrect,
     UserAlreadyExists,
-    ImageProfileHasNotFound,
-    FileIsEmpty,
+    FileException,
     TaskNotFound,
     
 }

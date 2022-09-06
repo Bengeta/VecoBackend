@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using VecoBackend.Data;
 using VecoBackend.Interfaces;
+using VecoBackend.Middlewares;
 using VecoBackend.Models;
 using VecoBackend.Seeders;
 using VecoBackend.Services;
@@ -132,10 +133,12 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+/*
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault()
-});
+});*/
+app.UseMiddleware<TokenHandlerMiddleware>();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();

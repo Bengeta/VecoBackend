@@ -37,7 +37,7 @@ public class ImageService
             profile.ImageType == imageType);
 
         if (imageProfile == null)
-            return new ResponseModel<int> {ResultCode = ResultCode.ImageProfileHasNotFound};
+            return new ResponseModel<int> {ResultCode = ResultCode.Failed};
 
         ValidateExtension(file, imageProfile);
         ValidateFileSize(file, imageProfile);

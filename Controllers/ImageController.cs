@@ -16,7 +16,6 @@ namespace VecoBackend.Controllers;
 public class ImageController : ControllerBase
 {
     private ImageService _imageService;
-
     public ImageController(ImageService imageService, ApplicationContext context)
     {
         _imageService = imageService;
@@ -27,7 +26,7 @@ public class ImageController : ControllerBase
     [Route("box")]
     public async Task<ResponseModel<int>> UploadBoxImage(UploadImageRequest request)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         return await UploadImage(request, ImageType.Box, token);
     }
 
@@ -35,7 +34,7 @@ public class ImageController : ControllerBase
     [Route("logo")]
     public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         return await UploadImage(request, ImageType.Logo, token);
     }
 
@@ -43,7 +42,7 @@ public class ImageController : ControllerBase
     [Route("images/{id}")]
     public async Task<ResponseModel<string>> DeleteImageById(DeleteImageRequest response, int id)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var res = await _imageService.DeleteImageById(token, response.taskId, id);
         var answer = new ResponseModel<string>() {ResultCode = res};
         return answer;
@@ -53,7 +52,7 @@ public class ImageController : ControllerBase
     [Route("images/all")]
     public async Task<ResponseModel<string>> DeleteImageTask(DeleteTaskImageRequest request)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var res = await _imageService.DeleteImageTask(request.taskId, token);
         var answer = new ResponseModel<string>() {ResultCode = res};
         return answer;
@@ -63,23 +62,22 @@ public class ImageController : ControllerBase
     [Route("images/{taskId}")]
     public async Task<ResponseModel<List<string>>> GetImageTask(int taskId)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var res = await _imageService.GetImageTask(taskId, token);
         if (res != null)
-            return new ResponseModel<List<string>>(){ResultCode = ResultCode.Success, Data = res};
-        return new ResponseModel<List<string>>(){ResultCode = ResultCode.Failed};
+            return new ResponseModel<List<string>>() {ResultCode = ResultCode.Success, Data = res};
+        return new ResponseModel<List<string>>() {ResultCode = ResultCode.Failed};
     }
 
 
     private async Task<ResponseModel<int>> UploadImage(UploadImageRequest request, ImageType type, string token)
     {
         if (request.file.Length == 0)
-            return new ResponseModel<int>() {ResultCode = ResultCode.FileIsEmpty};
+            return new ResponseModel<int>() {ResultCode = ResultCode.FileException};
 
         try
         {
-          return await _imageService.SaveImage(request.file, request.TaskId, type, token);
-            
+            return await _imageService.SaveImage(request.file, request.TaskId, type, token);
         }
         catch (ImageProcessingException ex)
         {

@@ -28,7 +28,7 @@ public class TaskController : ControllerBase
     [Route("tasks/all")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserAllTasks()
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var tasks = await _taskService.GetAllTasks(token);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -39,7 +39,7 @@ public class TaskController : ControllerBase
     [Route("tasks/uncompleted")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserUncompletedTasks()
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Created);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -50,7 +50,7 @@ public class TaskController : ControllerBase
     [Route("tasks/onprogress")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserOnProgressTasks()
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var tasks = await _taskService.GetTasks(token, TaskStatus.OnCheck);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -61,7 +61,7 @@ public class TaskController : ControllerBase
     [Route("tasks/completed")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserCompletedTasks()
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Finished);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -72,7 +72,7 @@ public class TaskController : ControllerBase
     [Route("tasks/{id}")]
     public async Task<ResponseModel<TaskModel>> GetUserTaskById(int id)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         var task = await _taskService.GetTaskById(id);
         if (task == null)
             return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Failed};
@@ -83,7 +83,7 @@ public class TaskController : ControllerBase
     [Route("task/status")]
     public async Task<ResponseModel<int>> ChangeTaskStatus(ChangeTaskStatusRequest request)
     {
-        var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var token = HttpContext.Items["Token"].ToString();
         return await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
     }
 }
