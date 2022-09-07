@@ -39,6 +39,14 @@ public class ImageController : ControllerBase
         var token = HttpContext.Items["Token"].ToString();
         return await UploadImage(request, ImageType.Logo, token);
     }
+    [HttpPost]
+    [Route("submition")]
+    public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
+    {
+        var token = HttpContext.Items["Token"].ToString();
+        var res= await _imageService.SubmitImages(request.imageId,request.taskId, token);
+        return new ResponseModel<int>{ResultCode = res};
+    }
 
     [HttpDelete]
     [Route("images/{id}")]
@@ -79,7 +87,7 @@ public class ImageController : ControllerBase
 
         try
         {
-            return await _imageService.SaveImage(request.file, request.TaskId, type, token);
+            return await _imageService.SaveImage(request.file, type, token);
         }
         catch (ImageProcessingException ex)
         {

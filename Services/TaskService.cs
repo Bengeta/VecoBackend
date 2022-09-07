@@ -31,6 +31,7 @@ public class TaskService
                 {
                     id = task.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     type = task.type,
                     isSeen = task.isSeen,
@@ -44,6 +45,7 @@ public class TaskService
                 {
                     id = task.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     type = task.type,
                     isSeen = task.isSeen,
@@ -73,6 +75,7 @@ public class TaskService
                 {
                     id = task.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     type = task.type,
                     isSeen = task.isSeen,
@@ -85,6 +88,7 @@ public class TaskService
                 {
                     id = task.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     type = task.type,
                     isSeen = task.isSeen,
@@ -136,6 +140,7 @@ public class TaskService
                 {
                     id = userTask.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     type = task.type,
                     name = user.name,

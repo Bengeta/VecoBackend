@@ -138,6 +138,7 @@ FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault()
 });*/
+
 app.UseMiddleware<TokenHandlerMiddleware>();
 app.UseStaticFiles();
 app.UseRouting();

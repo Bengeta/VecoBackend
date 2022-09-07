@@ -31,7 +31,7 @@ public class ImageService
         _context = applicationContext;
     }
 
-    public async Task<ResponseModel<int>> SaveImage(IFormFile file, int taskId, ImageType imageType, string token)
+    public async Task<ResponseModel<int>> SaveImage(IFormFile file, ImageType imageType, string token)
     {
         var imageProfile = _imageProfiles.FirstOrDefault(profile =>
             profile.ImageType == imageType);
@@ -65,7 +65,7 @@ public class ImageService
         image.Save(filePath, new JpegEncoder {Quality = 75});
 
         var fileUrl = Path.Combine(imageProfile.Folder, fileName);
-        var imgId = await SaveImageToDb(fileUrl, taskId, token);
+        var imgId = await SaveImageToDb(fileUrl, token);
         if (imgId > -1)
             return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
         return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
@@ -295,22 +295,68 @@ public class ImageService
     }
 
 
-    private async Task<int> SaveImageToDb(string filePath, int taskId, string token)
+    public async Task<ResultCode> SubmitImages(List<int> imagesId, int taskId, string token)
     {
         try
         {
-            var userTaskId =
+            var images =
                 await (from user in _context.UserModels
                     join userTask in _context.UserTaskModels on user.id equals userTask.user_id
                     join task in _context.TaskModels on userTask.task_id equals task.id
+                    join photo in _context.PhotoBufferModels on user.id equals photo.userId
                     where user.token == token && task.id == taskId
-                    select userTask.id).FirstOrDefaultAsync();
-            var image = new TaskPhotoModel()
+                    select new
+                    {
+                        userTaskId = userTask.id,
+                        photoPath = photo.photoPath,
+                        id = photo.id,
+                        userId = user.id
+                    }).ToListAsync();
+            var imagesSubmit = new List<TaskPhotoModel>();
+            var imagesDelete = new List<PhotoBufferModel>();
+            images.ForEach(u =>
+            {
+                if (imagesId.Contains(u.id))
+                {
+                    imagesSubmit.Add(new TaskPhotoModel()
+                    {
+                        photoPath = u.photoPath,
+                        UserTaskId = u.userTaskId
+                    });
+                }
+                imagesDelete.Add(new PhotoBufferModel()
+                {
+                    id = u.id,
+                    photoPath = u.photoPath,
+                    userId = u.userId
+                });
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, u.photoPath);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            });
+            _context.TaskPhotoModels.AddRange(imagesSubmit); 
+            _context.PhotoBufferModels.RemoveRange(imagesDelete);
+            await _context.SaveChangesAsync();
+            return ResultCode.Success;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ResultCode.Failed;
+        }
+    }
+
+    private async Task<int> SaveImageToDb(string filePath, string token)
+    {
+        try
+        {
+            var userId = await _context.UserModels.Where(u => u.token == token).Select(u => u.id).FirstOrDefaultAsync();
+            var image = new PhotoBufferModel()
             {
                 photoPath = filePath,
-                UserTaskId = userTaskId
+                userId = userId
             };
-            _context.TaskPhotoModels.Add(image);
+            _context.PhotoBufferModels.Add(image);
             await _context.SaveChangesAsync();
             return image.id;
         }

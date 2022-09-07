@@ -17,6 +17,7 @@ public class ApplicationContext : DbContext
     public DbSet<UserModel> UserModels { get; set; }
     public DbSet<UserTaskModel> UserTaskModels { get; set; }
     public DbSet<TaskPhotoModel> TaskPhotoModels { get; set; }
+    public DbSet<PhotoBufferModel> PhotoBufferModels { get; set; }
     public DbSet<NotificationTokensModel> NotificationTokensModels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

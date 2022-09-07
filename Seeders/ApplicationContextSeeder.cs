@@ -52,7 +52,8 @@ public class ApplicationContextSeeder
             {
                 id = 1,
                 points = 200,
-                description = "Сходить в магазин с собственной сумкой",
+                title = "Сходить в магазин с собственной сумкой",
+                description = "При походе в магазин вы не должны использовать пластиковые пакеты. Рекомендуем взять с собой шоппер/рюкзак/авоську.",
                 type = TaskType.Day,
                 deadline = DateTime.Today.AddDays(1)
             });
@@ -60,7 +61,8 @@ public class ApplicationContextSeeder
             {
                 id = 2,
                 points = 800,
-                description = "Сдать свой недельный мусор в пункт переработки",
+                title = "Сдать свой недельный мусор в пункт переработки",
+                description = "собрать мусор за неделю и сдать в пункт переработки",
                 type = TaskType.Week,
                 deadline = DateTime.Today.AddDays(7)
             });
@@ -68,7 +70,8 @@ public class ApplicationContextSeeder
             {
                 id = 3,
                 points = 2500,
-                description = "Провести уборку в парке своего района",
+                title = "Провести уборку в парке своего района",
+                description = "Огромное количество людей летом проводят свой отдых в парке, часто забывая про санитарные правила, станьте волонтером и очистите свой парк от мусора",
                 type = TaskType.Month,
                 deadline = DateTime.Today.AddMonths(1),
             });
