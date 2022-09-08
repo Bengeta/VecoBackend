@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VecoBackend.Models;
-[Table("TaskPhoto")]
-public class TaskPhotoModel
+[Table("TaskImage")]
+public class TaskImageModel
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int id { get; set; }
     public int UserTaskId { get; set; }
-    public string photoPath { get; set; }
+    public int imageId { get; set; }
 }

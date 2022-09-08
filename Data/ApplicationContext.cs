@@ -16,15 +16,14 @@ public class ApplicationContext : DbContext
     public DbSet<TaskModel> TaskModels { get; set; }
     public DbSet<UserModel> UserModels { get; set; }
     public DbSet<UserTaskModel> UserTaskModels { get; set; }
-    public DbSet<TaskPhotoModel> TaskPhotoModels { get; set; }
-    public DbSet<PhotoBufferModel> PhotoBufferModels { get; set; }
+    public DbSet<TaskImageModel> TaskImageModels { get; set; }
+    public DbSet<ImageStorageModel> ImageStorageModels { get; set; }
     public DbSet<NotificationTokensModel> NotificationTokensModels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserModel>().HasIndex(u => u.email).IsUnique();
         modelBuilder.Entity<UserModel>().HasIndex(u => u.token).IsUnique();
-        modelBuilder.Entity<TaskModel>().Property(t => t.deadline).HasColumnType("datetime2");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

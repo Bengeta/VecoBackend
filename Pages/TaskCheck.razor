@@ -44,12 +44,14 @@
 
     protected async Task Accept()
     {
-        await _imageService.AcceptTask(ImageSetResponse.UserTaskId);
+        await _imageService.AcceptTask(taskId);
+        NavigationManager.NavigateTo($"/TaskCheckList");
     }
 
     protected async Task Deny()
     {
-        await _imageService.DenyTask(ImageSetResponse.UserTaskId);
+        await _imageService.DenyTask(taskId);
+        NavigationManager.NavigateTo($"/TaskCheckList");
     }
 
 }

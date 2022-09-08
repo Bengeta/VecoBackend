@@ -40,7 +40,7 @@ public class ImageController : ControllerBase
         return await UploadImage(request, ImageType.Logo, token);
     }
     [HttpPost]
-    [Route("submition")]
+    [Route("images")]
     public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
     {
         var token = HttpContext.Items["Token"].ToString();
@@ -48,36 +48,16 @@ public class ImageController : ControllerBase
         return new ResponseModel<int>{ResultCode = res};
     }
 
-    [HttpDelete]
+    /*[HttpGet]
     [Route("images/{id}")]
-    public async Task<ResponseModel<string>> DeleteImageById(DeleteImageRequest response, int id)
+    public async Task<ResponseModel<List<string>>> GetImageById(int id)
     {
         var token = HttpContext.Items["Token"].ToString();
-        var res = await _imageService.DeleteImageById(token, response.taskId, id);
-        var answer = new ResponseModel<string>() {ResultCode = res};
-        return answer;
-    }
-
-    [HttpDelete]
-    [Route("images/all")]
-    public async Task<ResponseModel<string>> DeleteImageTask(DeleteTaskImageRequest request)
-    {
-        var token = HttpContext.Items["Token"].ToString();
-        var res = await _imageService.DeleteImageTask(request.taskId, token);
-        var answer = new ResponseModel<string>() {ResultCode = res};
-        return answer;
-    }
-
-    [HttpGet]
-    [Route("images/{taskId}")]
-    public async Task<ResponseModel<List<string>>> GetImageTask(int taskId)
-    {
-        var token = HttpContext.Items["Token"].ToString();
-        var res = await _imageService.GetImageTask(taskId, token);
+        var res = await _imageService.GetImageTask(id, token);
         if (res != null)
             return new ResponseModel<List<string>>() {ResultCode = ResultCode.Success, Data = res};
         return new ResponseModel<List<string>>() {ResultCode = ResultCode.Failed};
-    }
+    }*/
 
 
     private async Task<ResponseModel<int>> UploadImage(UploadImageRequest request, ImageType type, string token)

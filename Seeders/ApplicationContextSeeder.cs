@@ -22,28 +22,54 @@ public class ApplicationContextSeeder
         _applicationContext.TaskModels.RemoveRange(_applicationContext.TaskModels);
         _applicationContext.UserModels.RemoveRange(_applicationContext.UserModels);
         _applicationContext.UserTaskModels.RemoveRange(_applicationContext.UserTaskModels);
-        _applicationContext.TaskPhotoModels.RemoveRange(_applicationContext.TaskPhotoModels);
+        _applicationContext.TaskImageModels.RemoveRange(_applicationContext.TaskImageModels);
+        _applicationContext.ImageStorageModels.RemoveRange(_applicationContext.ImageStorageModels);
         _applicationContext.SaveChanges();
 
-        var photos = new List<TaskPhotoModel>()
+        var photosTask = new List<TaskImageModel>()
         {
-            new TaskPhotoModel()
+            new TaskImageModel()
             {
-                UserTaskId = 7,
-                photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
+                id = 1,
+                UserTaskId = 9,
+                imageId = 1
             },
-            new TaskPhotoModel()
+            new TaskImageModel()
             {
-                UserTaskId = 7,
-                photoPath = "res/ArcoLinux_2022-03-10_14-25-27.png"
+                id = 2,
+                UserTaskId = 9,
+                imageId = 2
             },
-            new TaskPhotoModel()
+            new TaskImageModel()
             {
-                UserTaskId = 7,
-                photoPath = "res/ArcoLinux_2022-02-20_15-12-32.png"
+                id = 3,
+                UserTaskId = 9,
+                imageId = 3
             },
         };
-        _applicationContext.TaskPhotoModels.AddRange(photos);
+        _applicationContext.TaskImageModels.AddRange(photosTask);
+        var photos = new List<ImageStorageModel>()
+        {
+            new ImageStorageModel()
+            {
+                id = 1,
+                userId = 3,
+                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+            },
+            new ImageStorageModel()
+            {
+                id = 2,
+                userId = 3,
+                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+            },
+            new ImageStorageModel()
+            {
+                id = 3,
+                userId = 3,
+                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+            },
+        };
+        _applicationContext.ImageStorageModels.AddRange(photos);
 
         var tasks = new List<TaskModel>();
         if (!_applicationContext.TaskModels.Any())

@@ -116,7 +116,7 @@ public class TaskService
                     where user.token == token && task.id == taskId
                     select userTask).FirstOrDefaultAsync();
             if (UserTask == null)
-                return new ResponseModel<int>(){ResultCode = ResultCode.TaskNotFound};
+                return new ResponseModel<int>() {ResultCode = ResultCode.TaskNotFound};
             UserTask.task_status = newStatus;
             await _context.SaveChangesAsync();
             return new ResponseModel<int>() {ResultCode = ResultCode.Success};
@@ -152,6 +152,7 @@ public class TaskService
                 {
                     userTaskId = task.id,
                     points = task.points,
+                    title = task.title,
                     description = task.description,
                     UserName = task.name,
                 });
