@@ -31,7 +31,7 @@ public class ImageService
         _context = applicationContext;
     }
 
-    public async Task<ResponseModel<int>> SaveImage(IFormFile file, ImageType imageType, string token)
+    public async Task<ResponseModel<int>> SaveImage(IFormFile file, ImageType imageType, string token,int taskId)
     {
         var imageProfile = _imageProfiles.FirstOrDefault(profile =>
             profile.ImageType == imageType);
@@ -65,7 +65,7 @@ public class ImageService
         image.Save(filePath, new JpegEncoder {Quality = 75});
 
         var fileUrl = Path.Combine(imageProfile.Folder, fileName);
-        var imgId = await SaveImageToDb(fileUrl, token);
+        var imgId = await SaveImageToDb(fileUrl, token,taskId);
         if (imgId > -1)
             return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
         return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
@@ -369,16 +369,24 @@ public class ImageService
     }
 
 
-    private async Task<int> SaveImageToDb(string filePath, string token)
+    private async Task<int> SaveImageToDb(string filePath, string token,int taskId)
     {
         try
         {
             var userId = await _context.UserModels.Where(u => u.token == token).Select(u => u.id).FirstOrDefaultAsync();
+            var isUserTask = await _context.UserTaskModels.AnyAsync(u => u.user_id == userId && u.task_id == taskId);
             var image = new ImageStorageModel()
             {
                 imagePath = filePath,
                 userId = userId
             };
+            if(!isUserTask)
+                _context.UserTaskModels.Add(new UserTaskModel()
+                {
+                    task_id = taskId,
+                    user_id = userId,
+                    task_status = Enums.TaskStatus.Created
+                });
             _context.ImageStorageModels.Add(image);
             await _context.SaveChangesAsync();
             return image.id;

@@ -67,7 +67,7 @@ public class ImageController : BaseController
 
         try
         {
-            return await _imageService.SaveImage(request.file, type, token);
+            return await _imageService.SaveImage(request.file, type, token,request.taskId);
         }
         catch (ImageProcessingException ex)
         {

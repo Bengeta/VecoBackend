@@ -180,4 +180,91 @@ public class TaskService
             return null;
         }
     }
+    public async Task AddTask(AddTaskResponse task)
+    {
+        try
+        {
+            var newTask = new TaskModel()
+            {
+                title = task.Title,
+                description = task.Description,
+                type = task.Type,
+                points = task.Points,
+                deadline = task.Deadline,
+                isSeen = false,
+            };
+            await _context.TaskModels.AddAsync(newTask);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task ChangeTaskVisibility(int taskId, bool visibility)
+    {
+        try
+        {
+            var task = await _context.TaskModels.Where(u => u.id == taskId).FirstOrDefaultAsync();
+            task.isSeen = visibility;
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    public async Task DeleteTask(int taskId)
+    {
+        try
+        {
+            var task = await _context.TaskModels.Where(u => u.id == taskId).FirstOrDefaultAsync();
+            _context.TaskModels.Remove(task);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    public async Task ChangeTask(ChangeTaskResponse task)
+    {
+        try
+        {
+            var newTask = await _context.TaskModels.Where(u => u.id == task.Id).FirstOrDefaultAsync();
+            newTask.title = task.Title;
+            newTask.description = task.Description;
+            newTask.type = task.Type;
+            newTask.points = task.Points;
+            newTask.deadline = task.Deadline;
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    public async Task<List<TaskModel>> GetTasksByType(TaskType type)
+    {
+        try
+        {
+            var tasks = await _context.TaskModels.Where(u => u.type == type).ToListAsync();
+            return tasks;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    
 }
