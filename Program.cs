@@ -133,11 +133,11 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-/*
+
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault()
-});*/
+});
 
 app.UseMiddleware<TokenHandlerMiddleware>();
 app.UseStaticFiles();

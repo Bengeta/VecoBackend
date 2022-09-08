@@ -13,7 +13,7 @@ namespace VecoBackend.Controllers;
 
 [ApiController]
 [Authorize]
-public class ImageController : ControllerBase
+public class ImageController : BaseController
 {
     private ImageService _imageService;
     public ImageController(ImageService imageService, ApplicationContext context)
@@ -27,7 +27,7 @@ public class ImageController : ControllerBase
     [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadBoxImage(UploadImageRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await UploadImage(request, ImageType.Box, token);
     }
 
@@ -36,14 +36,14 @@ public class ImageController : ControllerBase
     [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await UploadImage(request, ImageType.Logo, token);
     }
     [HttpPost]
     [Route("images")]
     public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var res= await _imageService.SubmitImages(request.imageId,request.taskId, token);
         return new ResponseModel<int>{ResultCode = res};
     }
@@ -52,7 +52,7 @@ public class ImageController : ControllerBase
     [Route("images/{id}")]
     public async Task<ResponseModel<List<string>>> GetImageById(int id)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var res = await _imageService.GetImageTask(id, token);
         if (res != null)
             return new ResponseModel<List<string>>() {ResultCode = ResultCode.Success, Data = res};

@@ -14,7 +14,7 @@ namespace VecoBackend.Controllers;
 
 [ApiController]
 [Authorize]
-public class TaskController : ControllerBase
+public class TaskController : BaseController
 {
     private TaskService _taskService;
 
@@ -28,7 +28,7 @@ public class TaskController : ControllerBase
     [Route("tasks/all")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserAllTasks()
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var tasks = await _taskService.GetAllTasks(token);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -39,7 +39,7 @@ public class TaskController : ControllerBase
     [Route("tasks/uncompleted")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserUncompletedTasks()
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Created);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -50,7 +50,7 @@ public class TaskController : ControllerBase
     [Route("tasks/onprogress")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserOnProgressTasks()
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.OnCheck);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -61,7 +61,7 @@ public class TaskController : ControllerBase
     [Route("tasks/completed")]
     public async Task<ResponseModel<List<TaskModel>>> GetUserCompletedTasks()
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Finished);
         if (tasks == null)
             return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
@@ -72,7 +72,7 @@ public class TaskController : ControllerBase
     [Route("tasks/{id}")]
     public async Task<ResponseModel<TaskModel>> GetUserTaskById(int id)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         var task = await _taskService.GetTaskById(id);
         if (task == null)
             return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Failed};
@@ -83,7 +83,7 @@ public class TaskController : ControllerBase
     [Route("task/status")]
     public async Task<ResponseModel<int>> ChangeTaskStatus(ChangeTaskStatusRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
     }
 }

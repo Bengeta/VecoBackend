@@ -17,7 +17,7 @@ namespace VecoBackend.Controllers;
 
 [ApiController]
 [Authorize]
-public class UserController : ControllerBase
+public class UserController : BaseController
 {
     private UserService _userService;
     private JwtSettings _options;
@@ -68,21 +68,21 @@ public class UserController : ControllerBase
     [HttpGet("user")]
     public async Task<ResponseModel<UserModelResponse>> GetUser()
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await _userService.GetUser(token);
     }
 
     [HttpPost("/device")]
     public async Task<ResponseModel<string>> AddDevice(AddTokenDeviceRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await _userService.AddDevice(token, request.DeviceToken);
     }
 
     [HttpPut("edite/password")]
     public async Task<ResponseModel<string>> EditePassword(EditPasswordRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await _userService.EditePassword(token, request.old_password, request.new_password);
     }
 
@@ -90,7 +90,7 @@ public class UserController : ControllerBase
     [HttpPut("/edite/username")]
     public async Task<ResponseModel<string>> EditeUsername([Bind("User")] EditUsernameRequest request)
     {
-        var token = HttpContext.Items["Token"].ToString();
+        var token = Token();
         return await _userService.EditeUsername(token, request.new_username);
     }
 }
