@@ -21,6 +21,8 @@ public class UserModel
     public Boolean isAdmin { get; set; }
     
     public int points { get; set; }
-    
+    public List<UserTaskModel> userTasks { get; set; }
+    public List<NotificationTokensModel> notificationTokens { get; set; }
+    public List<ImageStorageModel> images { get; set; }
 
 }

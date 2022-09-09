@@ -20,4 +20,5 @@ public class TaskModel
     public TaskType type { get; set; }
     public bool isSeen { get; set; }
     public DateTime deadline { get; set; }
+    public List<UserTaskModel> userTasks { get; set; }
 }
