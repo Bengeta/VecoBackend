@@ -26,6 +26,7 @@ var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddSingleton<ImageService>();
+builder.Services.AddTransient<TimerService>();
 builder.Services.AddSingleton<TaskService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddSingleton<UserService>();
@@ -35,7 +36,7 @@ builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 var connection = builder.Configuration.GetConnectionString("MainDB");
 builder.Services.AddTransient<ApplicationContextSeeder>();
 
-builder.Services.AddDbContext<ApplicationContext>(x => x.UseNpgsql(connection));
+builder.Services.AddDbContextFactory<ApplicationContext>(x => x.UseNpgsql(connection));
 
 builder.Services.AddAuthentication(options =>
     {
@@ -110,6 +111,8 @@ void SeedData(IHost app)
     {
         var service = scope.ServiceProvider.GetService<ApplicationContextSeeder>();
         service.Seed(secretKey, issuer, audience);
+        var timer = scope.ServiceProvider.GetService<TimerService>();
+        timer.Start();
     }
 }
 
