@@ -25,9 +25,9 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<UserModel>().HasIndex(u => u.email).IsUnique();
         modelBuilder.Entity<UserModel>().HasIndex(u => u.token).IsUnique();
         modelBuilder.Entity<UserTaskModel>().HasOne(x => x.user).WithMany(x => x.userTasks)
-            .HasForeignKey(x => x.user_id);
+            .HasForeignKey(x => x.UserId);
         modelBuilder.Entity<UserTaskModel>().HasOne(x => x.task).WithMany(x => x.userTasks)
-            .HasForeignKey(x => x.task_id);
+            .HasForeignKey(x => x.TaskId);
         modelBuilder.Entity<NotificationTokensModel>().HasOne(x => x.user).WithMany(x => x.notificationTokens)
             .HasForeignKey(x => x.UserId);
         modelBuilder.Entity<TaskImageModel>().HasOne(x => x.UserTask).WithMany(x => x.task_images)
@@ -36,6 +36,7 @@ public class ApplicationContext : DbContext
             .HasForeignKey(x => x.imageId);
         modelBuilder.Entity<ImageStorageModel>().HasOne(x => x.UserModel).WithMany(x => x.images)
             .HasForeignKey(x => x.userId);
+        modelBuilder.Entity<UserTaskModel>().Property(t => t.DeleteTime).HasColumnType("datetime2");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

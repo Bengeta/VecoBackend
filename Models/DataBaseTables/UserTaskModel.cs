@@ -8,14 +8,15 @@ namespace VecoBackend.Models;
 public class UserTaskModel
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int id { get; set; }
+    public int Id { get; set; }
     [ForeignKey("UserModel")]
-    public int user_id { get; set; }
+    public int UserId { get; set; }
 
     [ForeignKey("TaskModel")]
-    public int task_id { get; set; }
+    public int TaskId { get; set; }
+    public DateTime DeleteTime { get; set; }
     public UserModel user { get; set; }
     public TaskModel task { get; set; }
-    public TaskStatus task_status { get; set; }
+    public TaskStatus taskStatus { get; set; }
     public List<TaskImageModel> task_images { get; set; }
 }

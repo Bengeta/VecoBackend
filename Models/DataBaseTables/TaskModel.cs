@@ -9,16 +9,16 @@ namespace VecoBackend.Models;
 public class TaskModel
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int id { get; set; }
+    public int Id { get; set; }
     
-    public int points { get; set; }
-    public string title { get; set; }
+    public int Points { get; set; }
+    public string Title { get; set; }
     
-    public string description { get; set; }
+    public string Description { get; set; }
     [NotMapped]
-    public TaskStatus status { get; set; }
-    public TaskType type { get; set; }
-    public bool isSeen { get; set; }
-    public DateTime deadline { get; set; }
+    public TaskStatus Status { get; set; }
+    public TaskType Type { get; set; }
+    public bool IsSeen { get; set; }
+    public DateTime Deadline { get; set; }
     public List<UserTaskModel> userTasks { get; set; }
 }

@@ -19,67 +19,95 @@ public class TimerService
 
     public void Start()
     {
-        TimerCallback tm = new TimerCallback(DbClear);
-        var time = (60- DateTime.Now.Minute) *60* 1000;
-        Timer timer = new Timer(tm, null, time, 60*60 * 1000);
+        var timerCallback1 = new TimerCallback(DeleteOldTasks);
+        var time = (60 - DateTime.Now.Minute) * 60 * 1000;
+        new Timer(timerCallback1, null, time, 60 * 60 * 1000);
+        
+        var timerCallback2 = new TimerCallback(DeleteFinishedTasks);
+        var day = 24 * 60 * 60 * 1000;
+        time = (day - DateTime.Now.Millisecond) + 7 * day;
+        new Timer(timerCallback2, null, time, day);
     }
 
-    private async void DbClear(object? obj)
+    private async void DeleteOldTasks(object? obj)
     {
         await DeleteOldTasks();
+    }
+
+    private async void DeleteFinishedTasks(object? obj)
+    {
+        await DeleteFinishedTask();
     }
 
     public async Task DeleteOldTasks()
     {
         try
         {
-            using (var _context = _contextFactory.CreateDbContext())
-            {
-                var items = await (
-                    from userTask in _context.UserTaskModels
-                    join task in _context.TaskModels on userTask.task_id equals task.id
-                    join taskImage in _context.TaskImageModels on userTask.id equals taskImage.UserTaskId
-                    join images in _context.ImageStorageModels on taskImage.imageId equals images.id
-                    where task.deadline <= DateTime.Now && userTask.task_status == TaskStatus.Created
-                    orderby task.id
-                    select new
-                    {
-                        imageId = images.id,
-                        taskImageId = taskImage.id,
-                        userTaskId = userTask.id,
-                        taskId = task.id,
-                        points = task.points,
-                        title = task.title,
-                        description = task.description,
-                        type = task.type,
-                        deadline = task.deadline,
-                        imagePath = images.imagePath
-                    }).ToListAsync();
-                var prevTaskId = 0;
-                var userTasks = new List<UserTaskModel>();
-                var tasks = new List<TaskModel>();
-                var imagesDel = new List<ImageStorageModel>();
-
-                foreach (var item in items)
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var items = await (
+                from userTask in context.UserTaskModels
+                join task in context.TaskModels on userTask.TaskId equals task.Id
+                join taskImage in context.TaskImageModels on userTask.Id equals taskImage.UserTaskId
+                join images in context.ImageStorageModels on taskImage.imageId equals images.id
+                where task.Deadline <= DateTime.Now && userTask.taskStatus == TaskStatus.Created
+                orderby task.Id
+                select new
                 {
-                    userTasks.Add(new UserTaskModel() {id = item.userTaskId});
-                    if (prevTaskId != item.taskId)
-                        tasks.Add(new TaskModel()
-                        {
-                            id = item.taskId, isSeen = false, points = item.points, title = item.title,
-                            description = item.description, type = item.type, deadline = item.deadline
-                        });
-                    prevTaskId = item.taskId;
-                    imagesDel.Add(new ImageStorageModel() {id = item.imageId});
-                    var filePath = Path.Combine(_hostEnvironment.WebRootPath, item.imagePath);
-                    if (File.Exists(filePath))
-                        File.Delete(filePath);
-                }
-                _context.UserTaskModels.RemoveRange(userTasks);
-                _context.TaskModels.UpdateRange(tasks);
-                _context.ImageStorageModels.RemoveRange(imagesDel);
-                await _context.SaveChangesAsync();
+                    imageId = images.id,
+                    taskImageId = taskImage.id,
+                    userTaskId = userTask.Id,
+                    taskId = task.Id,
+                    points = task.Points,
+                    title = task.Title,
+                    description = task.Description,
+                    type = task.Type,
+                    deadline = task.Deadline,
+                    imagePath = images.imagePath
+                }).ToListAsync();
+            var prevTaskId = 0;
+            var userTasks = new List<UserTaskModel>();
+            var tasks = new List<TaskModel>();
+            var imagesDel = new List<ImageStorageModel>();
+
+            foreach (var item in items)
+            {
+                userTasks.Add(new UserTaskModel() {Id = item.userTaskId});
+                if (prevTaskId != item.taskId)
+                    tasks.Add(new TaskModel()
+                    {
+                        Id = item.taskId, IsSeen = false, Points = item.points, Title = item.title,
+                        Description = item.description, Type = item.type, Deadline = item.deadline
+                    });
+                prevTaskId = item.taskId;
+                imagesDel.Add(new ImageStorageModel() {id = item.imageId});
+                var filePath = Path.Combine(_hostEnvironment.WebRootPath, item.imagePath);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
             }
+
+            context.UserTaskModels.RemoveRange(userTasks);
+            context.TaskModels.UpdateRange(tasks);
+            context.ImageStorageModels.RemoveRange(imagesDel);
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task DeleteFinishedTask()
+    {
+        try
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var userTasks = await context.UserTaskModels
+                .Where(x => x.taskStatus == TaskStatus.Finished && x.DeleteTime <= DateTime.Today)
+                .ToListAsync();
+
+            context.UserTaskModels.RemoveRange(userTasks);
+            await context.SaveChangesAsync();
         }
         catch (Exception e)
         {

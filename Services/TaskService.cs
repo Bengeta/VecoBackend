@@ -24,33 +24,33 @@ public class TaskService
         try
         {
             var tasks = await (from user in _context.UserModels
-                join userTask in _context.UserTaskModels on user.id equals userTask.user_id
-                join task in _context.TaskModels on userTask.task_id equals task.id
+                join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                join task in _context.TaskModels on userTask.TaskId equals task.Id
                 where user.token == token
                 select new
                 {
-                    id = task.id,
-                    points = task.points,
-                    title = task.title,
-                    description = task.description,
-                    type = task.type,
-                    isSeen = task.isSeen,
-                    deadline = task.deadline,
-                    status = userTask.task_status
+                    id = task.Id,
+                    points = task.Points,
+                    title = task.Title,
+                    description = task.Description,
+                    type = task.Type,
+                    isSeen = task.IsSeen,
+                    deadline = task.Deadline,
+                    status = userTask.taskStatus
                 }).ToListAsync();
             var answer = new List<TaskModel>();
             tasks.ForEach(task =>
             {
                 answer.Add(new TaskModel
                 {
-                    id = task.id,
-                    points = task.points,
-                    title = task.title,
-                    description = task.description,
-                    type = task.type,
-                    isSeen = task.isSeen,
-                    deadline = task.deadline,
-                    status = task.status
+                    Id = task.id,
+                    Points = task.points,
+                    Title = task.title,
+                    Description = task.description,
+                    Type = task.type,
+                    IsSeen = task.isSeen,
+                    Deadline = task.deadline,
+                    Status = task.status
                 });
             });
 
@@ -68,31 +68,31 @@ public class TaskService
         try
         {
             var tasks = await (from user in _context.UserModels
-                join userTask in _context.UserTaskModels on user.id equals userTask.user_id
-                join task in _context.TaskModels on userTask.task_id equals task.id
-                where user.token == token && userTask.task_status == status
+                join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                join task in _context.TaskModels on userTask.TaskId equals task.Id
+                where user.token == token && userTask.taskStatus == status
                 select new
                 {
-                    id = task.id,
-                    points = task.points,
-                    title = task.title,
-                    description = task.description,
-                    type = task.type,
-                    isSeen = task.isSeen,
-                    deadline = task.deadline,
+                    id = task.Id,
+                    points = task.Points,
+                    title = task.Title,
+                    description = task.Description,
+                    type = task.Type,
+                    isSeen = task.IsSeen,
+                    deadline = task.Deadline,
                 }).ToListAsync();
             var answer = new List<TaskModel>();
             tasks.ForEach(task =>
             {
                 answer.Add(new TaskModel
                 {
-                    id = task.id,
-                    points = task.points,
-                    title = task.title,
-                    description = task.description,
-                    type = task.type,
-                    isSeen = task.isSeen,
-                    deadline = task.deadline,
+                    Id = task.id,
+                    Points = task.points,
+                    Title = task.title,
+                    Description = task.description,
+                    Type = task.type,
+                    IsSeen = task.isSeen,
+                    Deadline = task.deadline,
                 });
             });
 
@@ -111,13 +111,13 @@ public class TaskService
         {
             var UserTask =
                 await (from user in _context.UserModels
-                    join userTask in _context.UserTaskModels on user.id equals userTask.user_id
-                    join task in _context.TaskModels on userTask.task_id equals task.id
-                    where user.token == token && task.id == taskId
+                    join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
+                    where user.token == token && task.Id == taskId
                     select userTask).FirstOrDefaultAsync();
             if (UserTask == null)
                 return new ResponseModel<int>() {ResultCode = ResultCode.TaskNotFound};
-            UserTask.task_status = newStatus;
+            UserTask.taskStatus = newStatus;
             await _context.SaveChangesAsync();
             return new ResponseModel<int>() {ResultCode = ResultCode.Success};
         }
@@ -133,16 +133,16 @@ public class TaskService
         try
         {
             var tasks = await (from user in _context.UserModels
-                join userTask in _context.UserTaskModels on user.id equals userTask.user_id
-                join task in _context.TaskModels on userTask.task_id equals task.id
-                where userTask.task_status == TaskStatus.OnCheck
+                join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                join task in _context.TaskModels on userTask.TaskId equals task.Id
+                where userTask.taskStatus == TaskStatus.OnCheck
                 select new
                 {
-                    id = userTask.id,
-                    points = task.points,
-                    title = task.title,
-                    description = task.description,
-                    type = task.type,
+                    id = userTask.Id,
+                    points = task.Points,
+                    title = task.Title,
+                    description = task.Description,
+                    type = task.Type,
                     name = user.name,
                 }).ToListAsync();
             var answer = new List<CheckTaskListResponse>();
@@ -171,7 +171,7 @@ public class TaskService
     {
         try
         {
-            var task = await _context.TaskModels.Where(u => u.id == id).FirstOrDefaultAsync();
+            var task = await _context.TaskModels.Where(u => u.Id == id).FirstOrDefaultAsync();
             return task;
         }
         catch (Exception e)
@@ -186,12 +186,12 @@ public class TaskService
         {
             var newTask = new TaskModel()
             {
-                title = task.Title,
-                description = task.Description,
-                type = task.Type,
-                points = task.Points,
-                deadline = task.Deadline,
-                isSeen = false,
+                Title = task.Title,
+                Description = task.Description,
+                Type = task.Type,
+                Points = task.Points,
+                Deadline = task.Deadline,
+                IsSeen = false,
             };
             await _context.TaskModels.AddAsync(newTask);
             await _context.SaveChangesAsync();
@@ -207,8 +207,8 @@ public class TaskService
     {
         try
         {
-            var task = await _context.TaskModels.Where(u => u.id == taskId).FirstOrDefaultAsync();
-            task.isSeen = visibility;
+            var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
+            task.IsSeen = visibility;
             await _context.SaveChangesAsync();
         }
         catch (Exception e)
@@ -222,7 +222,7 @@ public class TaskService
     {
         try
         {
-            var task = await _context.TaskModels.Where(u => u.id == taskId).FirstOrDefaultAsync();
+            var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
             _context.TaskModels.Remove(task);
             await _context.SaveChangesAsync();
         }
@@ -237,12 +237,12 @@ public class TaskService
     {
         try
         {
-            var newTask = await _context.TaskModels.Where(u => u.id == task.Id).FirstOrDefaultAsync();
-            newTask.title = task.Title;
-            newTask.description = task.Description;
-            newTask.type = task.Type;
-            newTask.points = task.Points;
-            newTask.deadline = task.Deadline;
+            var newTask = await _context.TaskModels.Where(u => u.Id == task.Id).FirstOrDefaultAsync();
+            newTask.Title = task.Title;
+            newTask.Description = task.Description;
+            newTask.Type = task.Type;
+            newTask.Points = task.Points;
+            newTask.Deadline = task.Deadline;
             await _context.SaveChangesAsync();
         }
         catch (Exception e)
@@ -256,7 +256,7 @@ public class TaskService
     {
         try
         {
-            var tasks = await _context.TaskModels.Where(u => u.type == type).ToListAsync();
+            var tasks = await _context.TaskModels.Where(u => u.Type == type).ToListAsync();
             return tasks;
         }
         catch (Exception e)

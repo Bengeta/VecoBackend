@@ -76,30 +76,30 @@ public class ApplicationContextSeeder
         {
             tasks.Add(new TaskModel()
             {
-                id = 1,
-                points = 200,
-                title = "Сходить в магазин с собственной сумкой",
-                description = "При походе в магазин вы не должны использовать пластиковые пакеты. Рекомендуем взять с собой шоппер/рюкзак/авоську.",
-                type = TaskType.Day,
-                deadline = DateTime.Today.AddDays(1)
+                Id = 1,
+                Points = 200,
+                Title = "Сходить в магазин с собственной сумкой",
+                Description = "При походе в магазин вы не должны использовать пластиковые пакеты. Рекомендуем взять с собой шоппер/рюкзак/авоську.",
+                Type = TaskType.Day,
+                Deadline = DateTime.Today.AddDays(1)
             });
             tasks.Add(new TaskModel()
             {
-                id = 2,
-                points = 800,
-                title = "Сдать свой недельный мусор в пункт переработки",
-                description = "собрать мусор за неделю и сдать в пункт переработки",
-                type = TaskType.Week,
-                deadline = DateTime.Today.AddDays(7)
+                Id = 2,
+                Points = 800,
+                Title = "Сдать свой недельный мусор в пункт переработки",
+                Description = "собрать мусор за неделю и сдать в пункт переработки",
+                Type = TaskType.Week,
+                Deadline = DateTime.Today.AddDays(7)
             });
             tasks.Add(new TaskModel()
             {
-                id = 3,
-                points = 2500,
-                title = "Провести уборку в парке своего района",
-                description = "Огромное количество людей летом проводят свой отдых в парке, часто забывая про санитарные правила, станьте волонтером и очистите свой парк от мусора",
-                type = TaskType.Month,
-                deadline = DateTime.Today.AddMonths(1),
+                Id = 3,
+                Points = 2500,
+                Title = "Провести уборку в парке своего района",
+                Description = "Огромное количество людей летом проводят свой отдых в парке, часто забывая про санитарные правила, станьте волонтером и очистите свой парк от мусора",
+                Type = TaskType.Month,
+                Deadline = DateTime.Today.AddMonths(1),
             });
             _applicationContext.TaskModels.AddRange(tasks);
         }
@@ -163,14 +163,14 @@ public class ApplicationContextSeeder
             users.ForEach(u =>
                 tasks.ForEach(task => users_tasks.Add(new UserTaskModel()
                 {
-                    user_id = u.id,
-                    task_id = task.id,
-                    task_status = TaskStatus.Created,
-                    id = ++i
+                    UserId = u.id,
+                    TaskId = task.Id,
+                    taskStatus = TaskStatus.Created,
+                    Id = ++i
                 }))
             );
-            users_tasks[^1].task_status = TaskStatus.OnCheck;
-            users_tasks[^2].task_status = TaskStatus.Finished;
+            users_tasks[^1].taskStatus = TaskStatus.OnCheck;
+            users_tasks[^2].taskStatus = TaskStatus.Finished;
             _applicationContext.UserTaskModels.AddRange(users_tasks);
         }
 

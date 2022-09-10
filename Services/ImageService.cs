@@ -78,11 +78,11 @@ public class ImageService
         {
             var img =
                 await (from usr in _context.UserModels
-                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
-                    join task in _context.TaskModels on userTask.task_id equals task.id
-                    join imageTask in _context.TaskImageModels on userTask.id equals imageTask.UserTaskId
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
+                    join imageTask in _context.TaskImageModels on userTask.Id equals imageTask.UserTaskId
                     join image in _context.ImageStorageModels on imageTask.imageId equals image.id
-                    where (usr.token == token || usr.isAdmin) && task.id == taskId && imageTask.id == imageId
+                    where (usr.token == token || usr.isAdmin) && task.Id == taskId && imageTask.id == imageId
                     select new
                     {
                         imageTaskId = imageTask.id,
@@ -115,11 +115,11 @@ public class ImageService
         {
             var images =
                 await (from usr in _context.UserModels
-                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
-                    join task in _context.TaskModels on userTask.task_id equals task.id
-                    join imageTask in _context.TaskImageModels on userTask.id equals imageTask.UserTaskId
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
+                    join imageTask in _context.TaskImageModels on userTask.Id equals imageTask.UserTaskId
                     join image in _context.ImageStorageModels on imageTask.imageId equals image.id
-                    where (usr.token == token || usr.isAdmin) && userTask.id == userTaskId
+                    where (usr.token == token || usr.isAdmin) && userTask.Id == userTaskId
                     select image).ToListAsync();
             var imageTasks =
                 await (from imageTask in _context.TaskImageModels
@@ -151,11 +151,11 @@ public class ImageService
         {
             var images =
                 await (from usr in _context.UserModels
-                    join userTask in _context.UserTaskModels on usr.id equals userTask.user_id
-                    join task in _context.TaskModels on userTask.task_id equals task.id
-                    join photos in _context.TaskImageModels on userTask.id equals photos.UserTaskId
+                    join userTask in _context.UserTaskModels on usr.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
+                    join photos in _context.TaskImageModels on userTask.Id equals photos.UserTaskId
                     join image in _context.ImageStorageModels on photos.imageId equals image.id
-                    where (usr.token == token || usr.isAdmin) && userTask.id == userTaskId
+                    where (usr.token == token || usr.isAdmin) && userTask.Id == userTaskId
                     select image).ToListAsync();
             var boxImages = new List<string>();
             foreach (var image in images)
@@ -176,17 +176,17 @@ public class ImageService
         try
         {
             var task = await _context.UserTaskModels
-                .Where(u => u.task_status == Enums.TaskStatus.OnCheck && u.id == userTaskId)
+                .Where(u => u.taskStatus == Enums.TaskStatus.OnCheck && u.Id == userTaskId)
                 .FirstOrDefaultAsync();
             if (task == null)
                 return null;
-            //task.task_status = Enums.TaskStatus.IsChecking;
+            //task.taskStatus = Enums.TaskStatus.IsChecking;
             await _context.SaveChangesAsync();
-            var images = await GetImageTask(task.id);
+            var images = await GetImageTask(task.Id);
             var ans = new ImageSetResponse()
             {
                 ImagePaths = images,
-                UserTaskId = task.task_id
+                UserTaskId = task.TaskId
             };
             return ans;
         }
@@ -202,15 +202,15 @@ public class ImageService
         try
         {
             var user = await _context.UserModels.FirstOrDefaultAsync(u =>
-                u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.id == userTaskId)!.user_id);
+                u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.Id == userTaskId)!.UserId);
             var task = await _context.TaskModels.FirstOrDefaultAsync(u =>
-                u.id == _context.UserTaskModels.FirstOrDefault(ut => ut.id == userTaskId)!.task_id);
-            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.id == userTaskId);
-            userTask.task_status = Enums.TaskStatus.Finished;
-            user.points += task.points;
+                u.Id == _context.UserTaskModels.FirstOrDefault(ut => ut.Id == userTaskId)!.TaskId);
+            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.Id == userTaskId);
+            userTask.taskStatus = Enums.TaskStatus.Finished;
+            user.points += task.Points;
             await DeleteImageTask(userTaskId);
             await _context.SaveChangesAsync();
-            await Notificate(userTask.user_id, userTask.task_id, false);
+            await Notificate(userTask.UserId, userTask.TaskId, false);
         }
         catch (Exception e)
         {
@@ -222,13 +222,13 @@ public class ImageService
     {
         try
         {
-            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.id == userTaskId);
+            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u => u.Id == userTaskId);
             if (userTask != null)
             {
-                userTask.task_status = Enums.TaskStatus.Created;
+                userTask.taskStatus = Enums.TaskStatus.Created;
                 await DeleteImageTask(userTaskId);
                 await _context.SaveChangesAsync();
-                await Notificate(userTask.user_id, userTask.task_id, false);
+                await Notificate(userTask.UserId, userTask.TaskId, false);
             }
         }
         catch (Exception e)
@@ -245,7 +245,7 @@ public class ImageService
                 .ToListAsync();
             var task = await _context.TaskModels.FindAsync(taskId);
 
-            await NotificationService.Notify(tokens, isAccept, task.description);
+            await NotificationService.Notify(tokens, isAccept, task.Description);
         }
         catch (Exception e)
         {
@@ -319,13 +319,13 @@ public class ImageService
         {
             var images =
                 await (from user in _context.UserModels
-                    join userTask in _context.UserTaskModels on user.id equals userTask.user_id
-                    join task in _context.TaskModels on userTask.task_id equals task.id
+                    join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
                     join image in _context.ImageStorageModels on user.id equals image.userId
-                    where user.token == token && task.id == taskId
+                    where user.token == token && task.Id == taskId
                     select new
                     {
-                        userTaskId = userTask.id,
+                        userTaskId = userTask.Id,
                         id = image.id,
                         imagePath = image.imagePath,
                         userId = user.id
@@ -374,7 +374,7 @@ public class ImageService
         try
         {
             var userId = await _context.UserModels.Where(u => u.token == token).Select(u => u.id).FirstOrDefaultAsync();
-            var isUserTask = await _context.UserTaskModels.AnyAsync(u => u.user_id == userId && u.task_id == taskId);
+            var isUserTask = await _context.UserTaskModels.AnyAsync(u => u.UserId == userId && u.TaskId == taskId);
             var image = new ImageStorageModel()
             {
                 imagePath = filePath,
@@ -383,9 +383,9 @@ public class ImageService
             if(!isUserTask)
                 _context.UserTaskModels.Add(new UserTaskModel()
                 {
-                    task_id = taskId,
-                    user_id = userId,
-                    task_status = Enums.TaskStatus.Created
+                    TaskId = taskId,
+                    UserId = userId,
+                    taskStatus = Enums.TaskStatus.Created
                 });
             _context.ImageStorageModels.Add(image);
             await _context.SaveChangesAsync();
