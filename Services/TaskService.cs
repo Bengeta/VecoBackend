@@ -5,6 +5,7 @@ using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
 using VecoBackend.Responses;
+using VecoBackend.Utils;
 using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 
@@ -19,14 +20,14 @@ public class TaskService
         _context = applicationContext;
     }
 
-    public async Task<List<TaskModel>> GetAllTasks(string token)
+    public async Task<List<GetTaskResponse>> GetAllTasks(string token)
     {
         try
         {
-            var tasks = await (from user in _context.UserModels
+            var startTask = await (from user in _context.UserModels
                 join userTask in _context.UserTaskModels on user.id equals userTask.UserId
                 join task in _context.TaskModels on userTask.TaskId equals task.Id
-                where user.token == token
+                where user.token == token && userTask.taskStatus != TaskStatus.Created && task.IsSeen
                 select new
                 {
                     id = task.Id,
@@ -38,10 +39,12 @@ public class TaskService
                     deadline = task.Deadline,
                     status = userTask.taskStatus
                 }).ToListAsync();
-            var answer = new List<TaskModel>();
-            tasks.ForEach(task =>
+            var answer = new List<GetTaskResponse>();
+            var startTaskId = new List<int>();
+            startTask.ForEach(task =>
             {
-                answer.Add(new TaskModel
+                startTaskId.Add(task.id);
+                answer.Add(new GetTaskResponse()
                 {
                     Id = task.id,
                     Points = task.points,
@@ -49,10 +52,12 @@ public class TaskService
                     Description = task.description,
                     Type = task.type,
                     IsSeen = task.isSeen,
-                    Deadline = task.deadline,
+                    Deadline = Converter.ToUnixTime(task.deadline),
                     Status = task.status
                 });
             });
+            var notStartedTasks = await _context.TaskModels.Where(x => x.IsSeen && !startTaskId.Contains(x.Id)).ToListAsync();
+            answer.AddRange(ConvertToGetTaskResponse(notStartedTasks));
 
             return answer;
         }
@@ -63,39 +68,21 @@ public class TaskService
         }
     }
 
-    public async Task<List<TaskModel>> GetTasks(string token, TaskStatus status)
+    public async Task<List<GetTaskResponse>> GetTasks(string token, TaskStatus status)
     {
         try
         {
-            var tasks = await (from user in _context.UserModels
+            List<TaskModel> tasks;
+            if(status == TaskStatus.Created)
+                tasks = await _context.TaskModels.Where(x => x.IsSeen).ToListAsync();
+            else
+                tasks = await (from user in _context.UserModels
                 join userTask in _context.UserTaskModels on user.id equals userTask.UserId
                 join task in _context.TaskModels on userTask.TaskId equals task.Id
                 where user.token == token && userTask.taskStatus == status
-                select new
-                {
-                    id = task.Id,
-                    points = task.Points,
-                    title = task.Title,
-                    description = task.Description,
-                    type = task.Type,
-                    isSeen = task.IsSeen,
-                    deadline = task.Deadline,
-                }).ToListAsync();
-            var answer = new List<TaskModel>();
-            tasks.ForEach(task =>
-            {
-                answer.Add(new TaskModel
-                {
-                    Id = task.id,
-                    Points = task.points,
-                    Title = task.title,
-                    Description = task.description,
-                    Type = task.type,
-                    IsSeen = task.isSeen,
-                    Deadline = task.deadline,
-                });
-            });
-
+                select task).ToListAsync();
+            var answer = new List<GetTaskResponse>();
+            answer.AddRange(ConvertToGetTaskResponse(tasks));
             return answer;
         }
         catch (Exception e)
@@ -167,12 +154,12 @@ public class TaskService
         }
     }
 
-    public async Task<TaskModel> GetTaskById(int id)
+    public async Task<GetTaskResponse> GetTaskById(int id)
     {
         try
         {
             var task = await _context.TaskModels.Where(u => u.Id == id).FirstOrDefaultAsync();
-            return task;
+            return ConvertToGetTaskResponse(task);
         }
         catch (Exception e)
         {
@@ -180,6 +167,7 @@ public class TaskService
             return null;
         }
     }
+
     public async Task AddTask(AddTaskResponse task)
     {
         try
@@ -217,7 +205,7 @@ public class TaskService
             throw;
         }
     }
-    
+
     public async Task DeleteTask(int taskId)
     {
         try
@@ -232,7 +220,7 @@ public class TaskService
             throw;
         }
     }
-    
+
     public async Task ChangeTask(ChangeTaskResponse task)
     {
         try
@@ -251,7 +239,7 @@ public class TaskService
             throw;
         }
     }
-    
+
     public async Task<List<TaskModel>> GetTasksByType(TaskType type)
     {
         try
@@ -266,5 +254,35 @@ public class TaskService
         }
     }
     
-    
+    private List<GetTaskResponse> ConvertToGetTaskResponse(List<TaskModel> tasks)
+    {
+        var answer = new List<GetTaskResponse>();
+        tasks.ForEach(task =>
+        {
+            answer.Add(new GetTaskResponse()
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                Type = task.Type,
+                Points = task.Points,
+                Deadline = Converter.ToUnixTime(task.Deadline),
+                IsSeen = task.IsSeen,
+            });
+        });
+        return answer;
+    }
+    private GetTaskResponse ConvertToGetTaskResponse(TaskModel task)
+    {
+        return new GetTaskResponse()
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            Type = task.Type,
+            Points = task.Points,
+            Deadline = Converter.ToUnixTime(task.Deadline),
+            IsSeen = task.IsSeen,
+        };
+    }
 }

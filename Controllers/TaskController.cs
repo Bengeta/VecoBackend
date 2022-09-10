@@ -16,7 +16,7 @@ namespace VecoBackend.Controllers;
 [Authorize]
 public class TaskController : BaseController
 {
-    private TaskService _taskService;
+    private readonly TaskService _taskService;
 
     public TaskController(TaskService taskService, ApplicationContext _applicationContext)
     {
@@ -26,57 +26,57 @@ public class TaskController : BaseController
 
     [HttpGet]
     [Route("tasks/all")]
-    public async Task<ResponseModel<List<TaskModel>>> GetUserAllTasks()
+    public async Task<ResponseModel<List<GetTaskResponse>>> GetUserAllTasks()
     {
         var token = Token();
         var tasks = await _taskService.GetAllTasks(token);
         if (tasks == null)
-            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
+            return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/uncompleted")]
-    public async Task<ResponseModel<List<TaskModel>>> GetUserUncompletedTasks()
+    public async Task<ResponseModel<List<GetTaskResponse>>> GetUserUncompletedTasks()
     {
         var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Created);
         if (tasks == null)
-            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
+            return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/onprogress")]
-    public async Task<ResponseModel<List<TaskModel>>> GetUserOnProgressTasks()
+    public async Task<ResponseModel<List<GetTaskResponse>>> GetUserOnProgressTasks()
     {
         var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.OnCheck);
         if (tasks == null)
-            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
+            return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/completed")]
-    public async Task<ResponseModel<List<TaskModel>>> GetUserCompletedTasks()
+    public async Task<ResponseModel<List<GetTaskResponse>>> GetUserCompletedTasks()
     {
         var token = Token();
         var tasks = await _taskService.GetTasks(token, TaskStatus.Finished);
         if (tasks == null)
-            return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<TaskModel>>() {ResultCode = ResultCode.Success, Data = tasks};
+            return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<List<GetTaskResponse>>() {ResultCode = ResultCode.Success, Data = tasks};
     }
 
     [HttpGet]
     [Route("tasks/{id}")]
-    public async Task<ResponseModel<TaskModel>> GetUserTaskById(int id)
+    public async Task<ResponseModel<GetTaskResponse>> GetUserTaskById(int id)
     {
         var token = Token();
         var task = await _taskService.GetTaskById(id);
         if (task == null)
-            return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Failed};
-        return new ResponseModel<TaskModel>() {ResultCode = ResultCode.Success, Data = task};
+            return new ResponseModel<GetTaskResponse>() {ResultCode = ResultCode.Failed};
+        return new ResponseModel<GetTaskResponse>() {ResultCode = ResultCode.Success, Data = task};
     }
 
     [HttpPut]

@@ -36,7 +36,7 @@ public class ApplicationContext : DbContext
             .HasForeignKey(x => x.imageId);
         modelBuilder.Entity<ImageStorageModel>().HasOne(x => x.UserModel).WithMany(x => x.images)
             .HasForeignKey(x => x.userId);
-        modelBuilder.Entity<UserTaskModel>().Property(t => t.DeleteTime).HasColumnType("datetime2");
+
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

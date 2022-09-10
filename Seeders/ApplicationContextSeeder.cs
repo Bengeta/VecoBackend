@@ -81,7 +81,8 @@ public class ApplicationContextSeeder
                 Title = "Сходить в магазин с собственной сумкой",
                 Description = "При походе в магазин вы не должны использовать пластиковые пакеты. Рекомендуем взять с собой шоппер/рюкзак/авоську.",
                 Type = TaskType.Day,
-                Deadline = DateTime.Today.AddDays(1)
+                Deadline = DateTime.Today.AddDays(1),
+                IsSeen = true
             });
             tasks.Add(new TaskModel()
             {
@@ -90,7 +91,8 @@ public class ApplicationContextSeeder
                 Title = "Сдать свой недельный мусор в пункт переработки",
                 Description = "собрать мусор за неделю и сдать в пункт переработки",
                 Type = TaskType.Week,
-                Deadline = DateTime.Today.AddDays(7)
+                Deadline = DateTime.Today.AddDays(7),
+                IsSeen = true
             });
             tasks.Add(new TaskModel()
             {
@@ -100,6 +102,7 @@ public class ApplicationContextSeeder
                 Description = "Огромное количество людей летом проводят свой отдых в парке, часто забывая про санитарные правила, станьте волонтером и очистите свой парк от мусора",
                 Type = TaskType.Month,
                 Deadline = DateTime.Today.AddMonths(1),
+                IsSeen = true
             });
             _applicationContext.TaskModels.AddRange(tasks);
         }
