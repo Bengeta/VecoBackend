@@ -54,19 +54,19 @@ public class ApplicationContextSeeder
             {
                 id = 1,
                 userId = 3,
-                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
             },
             new ImageStorageModel()
             {
                 id = 2,
                 userId = 3,
-                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
             },
             new ImageStorageModel()
             {
                 id = 3,
                 userId = 3,
-                imagePath = "res/ArcoLinux_2022-03-10_14-25-27.png",
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
             },
         };
         _applicationContext.ImageStorageModels.AddRange(photos);

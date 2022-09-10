@@ -12,7 +12,7 @@ public class BoxImageProfileModel : IImageProfile
 
     public BoxImageProfileModel()
     {
-        AllowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+        AllowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" , ".webp" };
     }
 
     public ImageType ImageType => ImageType.Box;

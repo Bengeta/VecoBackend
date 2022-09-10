@@ -10,7 +10,7 @@ public class TimerService
     private readonly IDbContextFactory<ApplicationContext> _contextFactory;
     private readonly IWebHostEnvironment _hostEnvironment;
 
-    public TimerService(TaskService taskService, IDbContextFactory<ApplicationContext> contextFactory,
+    public TimerService(IDbContextFactory<ApplicationContext> contextFactory,
         IWebHostEnvironment hostingEnvironment)
     {
         _contextFactory = contextFactory;
@@ -22,7 +22,7 @@ public class TimerService
         var timerCallback1 = new TimerCallback(DeleteOldTasks);
         var time = (60 - DateTime.Now.Minute) * 60 * 1000;
         new Timer(timerCallback1, null, time, 60 * 60 * 1000);
-        
+
         var timerCallback2 = new TimerCallback(DeleteFinishedTasks);
         var day = 24 * 60 * 60 * 1000;
         time = (day - DateTime.Now.Millisecond) + 7 * day;

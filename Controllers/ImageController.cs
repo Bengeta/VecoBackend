@@ -16,6 +16,7 @@ namespace VecoBackend.Controllers;
 public class ImageController : BaseController
 {
     private ImageService _imageService;
+
     public ImageController(ImageService imageService, ApplicationContext context)
     {
         _imageService = imageService;
@@ -25,27 +26,28 @@ public class ImageController : BaseController
     [HttpPost]
     [Route("box")]
     [RequestSizeLimit(4_000_000)]
-    public async Task<ResponseModel<int>> UploadBoxImage(UploadImageRequest request)
+    public async Task<ResponseModel<int>> UploadBoxImage([FromForm]UploadImageRequest request)
     {
         var token = Token();
         return await UploadImage(request, ImageType.Box, token);
     }
 
-    [HttpPost]
+    /*[HttpPost]
     [Route("logo")]
     [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
         var token = Token();
         return await UploadImage(request, ImageType.Logo, token);
-    }
+    }*/
+
     [HttpPost]
     [Route("images")]
     public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
     {
         var token = Token();
-        var res= await _imageService.SubmitImages(request.imageId,request.taskId, token);
-        return new ResponseModel<int>{ResultCode = res};
+        var res = await _imageService.SubmitImages(request.imageId, request.taskId, token);
+        return new ResponseModel<int> {ResultCode = res};
     }
 
     /*[HttpGet]
@@ -67,7 +69,7 @@ public class ImageController : BaseController
 
         try
         {
-            return await _imageService.SaveImage(request.file, type, token,request.taskId);
+            return await _imageService.SaveImage(request.file, type, token);
         }
         catch (ImageProcessingException ex)
         {
