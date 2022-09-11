@@ -11,6 +11,7 @@ public class ImageStorageModel
     [ForeignKey("UserModel")]
     public int userId { get; set; }
     public string imagePath { get; set; }
+    public bool isUsed { get; set; }
     public UserModel UserModel { get; set; }
     public List<TaskImageModel> TaskImageModel { get; set; }
 }

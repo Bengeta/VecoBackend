@@ -320,62 +320,6 @@ public class ImageService
     }
 
 
-    public async Task<ResultCode> SubmitImages(List<int> imagesId, int taskId, string token)
-    {
-        try
-        {
-            var images =
-                await (from user in _context.UserModels
-                    join userTask in _context.UserTaskModels on user.id equals userTask.UserId
-                    join task in _context.TaskModels on userTask.TaskId equals task.Id
-                    join image in _context.ImageStorageModels on user.id equals image.userId
-                    where user.token == token && task.Id == taskId
-                    select new
-                    {
-                        userTaskId = userTask.Id,
-                        id = image.id,
-                        imagePath = image.imagePath,
-                        userId = user.id
-                    }).ToListAsync();
-            var imagesSubmit = new List<TaskImageModel>();
-            var imagesDelete = new List<ImageStorageModel>();
-            images.ForEach(u =>
-            {
-                if (imagesId.Contains(u.id))
-                {
-                    imagesSubmit.Add(new TaskImageModel()
-                    {
-                        imageId = u.id,
-                        UserTaskId = u.userTaskId
-                    });
-                }
-                else
-                {
-                    imagesDelete.Add(new ImageStorageModel()
-                    {
-                        id = u.id,
-                        imagePath = u.imagePath,
-                        userId = u.userId
-                    });
-
-                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, u.imagePath);
-                    if (File.Exists(filePath))
-                        File.Delete(filePath);
-                }
-            });
-            _context.TaskImageModels.AddRange(imagesSubmit);
-            _context.ImageStorageModels.RemoveRange(imagesDelete);
-            await _context.SaveChangesAsync();
-            return ResultCode.Success;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return ResultCode.Failed;
-        }
-    }
-
-
     private async Task<int> SaveImageToDb(string filePath, string token)
     {
         try

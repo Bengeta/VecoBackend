@@ -26,7 +26,7 @@ public class ImageController : BaseController
     [HttpPost]
     [Route("box")]
     [RequestSizeLimit(4_000_000)]
-    public async Task<ResponseModel<int>> UploadBoxImage([FromForm]UploadImageRequest request)
+    public async Task<ResponseModel<int>> UploadBoxImage([FromForm] UploadImageRequest request)
     {
         var token = Token();
         return await UploadImage(request, ImageType.Box, token);
@@ -41,14 +41,6 @@ public class ImageController : BaseController
         return await UploadImage(request, ImageType.Logo, token);
     }*/
 
-    [HttpPost]
-    [Route("images")]
-    public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
-    {
-        var token = Token();
-        var res = await _imageService.SubmitImages(request.imageId, request.taskId, token);
-        return new ResponseModel<int> {ResultCode = res};
-    }
 
     /*[HttpGet]
     [Route("images/{id}")]

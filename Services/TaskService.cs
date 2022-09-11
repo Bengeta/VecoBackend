@@ -14,6 +14,12 @@ namespace VecoBackend.Services;
 public class TaskService
 {
     private ApplicationContext _context;
+    private readonly IWebHostEnvironment _hostingEnvironment;
+
+    public TaskService(IWebHostEnvironment webHostEnvironment, IWebHostEnvironment hostingEnvironment)
+    {
+        _hostingEnvironment = hostingEnvironment;
+    }
 
     public void AddContext(ApplicationContext applicationContext)
     {
@@ -56,7 +62,8 @@ public class TaskService
                     Status = task.status
                 });
             });
-            var notStartedTasks = await _context.TaskModels.Where(x => x.IsSeen && !startTaskId.Contains(x.Id)).ToListAsync();
+            var notStartedTasks =
+                await _context.TaskModels.Where(x => x.IsSeen && !startTaskId.Contains(x.Id)).ToListAsync();
             answer.AddRange(ConvertToGetTaskResponse(notStartedTasks));
 
             return answer;
@@ -73,14 +80,14 @@ public class TaskService
         try
         {
             List<TaskModel> tasks;
-            if(status == TaskStatus.Created)
+            if (status == TaskStatus.Created)
                 tasks = await _context.TaskModels.Where(x => x.IsSeen).ToListAsync();
             else
                 tasks = await (from user in _context.UserModels
-                join userTask in _context.UserTaskModels on user.id equals userTask.UserId
-                join task in _context.TaskModels on userTask.TaskId equals task.Id
-                where user.token == token && userTask.taskStatus == status
-                select task).ToListAsync();
+                    join userTask in _context.UserTaskModels on user.id equals userTask.UserId
+                    join task in _context.TaskModels on userTask.TaskId equals task.Id
+                    where user.token == token && userTask.taskStatus == status
+                    select task).ToListAsync();
             var answer = new List<GetTaskResponse>();
             answer.AddRange(ConvertToGetTaskResponse(tasks));
             return answer;
@@ -253,7 +260,79 @@ public class TaskService
             throw;
         }
     }
-    
+
+
+    public async Task<ResultCode> SubmitImages(List<int> imagesId, int taskId, string token)
+    {
+        try
+        {
+            var images =
+                await (from user in _context.UserModels
+                    join image in _context.ImageStorageModels on user.id equals image.userId
+                    where user.token == token && !image.isUsed
+                    select image).ToListAsync();
+            var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
+            if(task == null)
+                return ResultCode.TaskNotFound;
+            var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u =>
+                u.UserId == images[0].userId && u.TaskId == taskId);
+            if (userTask == null)
+            {
+                userTask = new UserTaskModel()
+                {
+                    TaskId = taskId,
+                    UserId = images[0].userId,
+                    taskStatus = Enums.TaskStatus.OnCheck,
+                    user = images[0].UserModel,
+                    task = task,
+                };
+                _context.UserTaskModels.Add(userTask);
+            }
+            else
+            {
+                userTask.taskStatus = Enums.TaskStatus.OnCheck;
+                userTask.TaskId = taskId;
+                userTask.UserId = images[0].userId;
+                _context.UserTaskModels.Update(userTask);
+            }
+
+
+            foreach (var image in images)
+            {
+                if (imagesId.Contains(image.id))
+                {
+                    _context.TaskImageModels.Add(new TaskImageModel()
+                    {
+                        imageId = image.id,
+                        UserTaskId = userTask.Id,
+                        ImageStorage = image,
+                        UserTask = userTask
+                    });
+                    image.isUsed = true;
+                    _context.ImageStorageModels.Update(image);
+                }
+                else
+                {
+                    _context.ImageStorageModels.Remove(image);
+
+                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.imagePath);
+                    if (File.Exists(filePath))
+                        File.Delete(filePath);
+                }
+            }
+
+            ;
+
+            await _context.SaveChangesAsync();
+            return ResultCode.Success;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ResultCode.Failed;
+        }
+    }
+
     private List<GetTaskResponse> ConvertToGetTaskResponse(List<TaskModel> tasks)
     {
         var answer = new List<GetTaskResponse>();
@@ -272,6 +351,7 @@ public class TaskService
         });
         return answer;
     }
+
     private GetTaskResponse ConvertToGetTaskResponse(TaskModel task)
     {
         return new GetTaskResponse()

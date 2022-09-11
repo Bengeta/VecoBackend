@@ -6,6 +6,7 @@ using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
+using VecoBackend.Requests;
 using VecoBackend.Responses;
 using VecoBackend.Services;
 using TaskStatus = VecoBackend.Enums.TaskStatus;
@@ -25,7 +26,7 @@ public class TaskController : BaseController
     }
 
     [HttpGet]
-    [Route("tasks/all")]
+    [Route("tasks")]
     public async Task<ResponseModel<List<GetTaskResponse>>> GetUserAllTasks()
     {
         var token = Token();
@@ -85,5 +86,14 @@ public class TaskController : BaseController
     {
         var token = Token();
         return await _taskService.ChangeTaskStatus(token, request.newStatus, request.taskId);
+    }
+
+    [HttpPost]
+    [Route("task/images")]
+    public async Task<ResponseModel<int>> SubmitImages(SubmitImageRequest request)
+    {
+        var token = Token();
+        var res = await _taskService.SubmitImages(request.imageId, request.taskId, token);
+        return new ResponseModel<int> {ResultCode = res};
     }
 }
