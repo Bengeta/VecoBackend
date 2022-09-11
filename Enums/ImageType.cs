@@ -2,6 +2,8 @@ namespace VecoBackend.Enums;
 
 public enum ImageType
 {
-    Box,
-    Logo,
+    Task,
+    Author,
+    Material,
+    
 }

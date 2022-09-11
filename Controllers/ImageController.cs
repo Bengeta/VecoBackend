@@ -29,16 +29,17 @@ public class ImageController : BaseController
     public async Task<ResponseModel<int>> UploadBoxImage([FromForm] UploadImageRequest request)
     {
         var token = Token();
-        return await UploadImage(request, ImageType.Box, token);
+        return await UploadImage(request, SaveImageType.Box, token);
     }
 
-    /*[HttpPost]
+    /*
+    [HttpPost]
     [Route("logo")]
     [RequestSizeLimit(4_000_000)]
     public async Task<ResponseModel<int>> UploadLogoImage(UploadImageRequest request)
     {
         var token = Token();
-        return await UploadImage(request, ImageType.Logo, token);
+        return await UploadImage(request, SaveImageType.Logo, token);
     }*/
 
 
@@ -54,7 +55,7 @@ public class ImageController : BaseController
     }*/
 
 
-    private async Task<ResponseModel<int>> UploadImage(UploadImageRequest request, ImageType type, string token)
+    private async Task<ResponseModel<int>> UploadImage(UploadImageRequest request, SaveImageType type, string token)
     {
         if (request.file.Length == 0)
             return new ResponseModel<int>() {ResultCode = ResultCode.FileException};

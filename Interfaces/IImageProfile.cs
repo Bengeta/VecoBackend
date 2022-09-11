@@ -4,7 +4,7 @@ namespace VecoBackend.Interfaces;
 
 public interface IImageProfile
 {
-    ImageType ImageType { get; }
+    SaveImageType ImageType { get; }
 
     string Folder { get; }
 

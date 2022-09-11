@@ -15,7 +15,7 @@ public class BoxImageProfileModel : IImageProfile
         AllowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" , ".webp" };
     }
 
-    public ImageType ImageType => ImageType.Box;
+    public SaveImageType ImageType => SaveImageType.Box;
 
     public string Folder => "boxes";
 

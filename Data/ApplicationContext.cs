@@ -19,6 +19,8 @@ public class ApplicationContext : DbContext
     public DbSet<TaskImageModel> TaskImageModels { get; set; }
     public DbSet<ImageStorageModel> ImageStorageModels { get; set; }
     public DbSet<NotificationTokensModel> NotificationTokensModels { get; set; }
+    public DbSet<MaterialModel> MaterialModels { get; set; }
+    public DbSet<MaterialImageModel> MaterialImageModels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +38,11 @@ public class ApplicationContext : DbContext
             .HasForeignKey(x => x.imageId);
         modelBuilder.Entity<ImageStorageModel>().HasOne(x => x.UserModel).WithMany(x => x.images)
             .HasForeignKey(x => x.userId);
+        modelBuilder.Entity<MaterialImageModel>().HasOne(x => x.MaterialModel).WithMany(x => x.Images)
+            .HasForeignKey(x => x.MaterialId);
+        modelBuilder.Entity<MaterialImageModel>().HasOne(x => x.ImageStorageModel).WithMany(x => x.MaterialImageModel)
+            .HasForeignKey(x => x.ImageId);
+        modelBuilder.Entity<MaterialModel>().Property(t=>t.Date).HasColumnType("datetime2");
 
     }
 

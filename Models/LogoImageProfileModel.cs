@@ -12,7 +12,7 @@ public class LogoImageProfileModel : IImageProfile
         AllowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
     }
 
-    public ImageType ImageType => ImageType.Logo;
+    public SaveImageType ImageType => SaveImageType.Logo;
 
     public string Folder => "logos";
 

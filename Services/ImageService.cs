@@ -31,7 +31,7 @@ public class ImageService
         _context = applicationContext;
     }
 
-    public async Task<ResponseModel<int>> SaveImage(IFormFile file, ImageType imageType, string token)
+    public async Task<ResponseModel<int>> SaveImage(IFormFile file, SaveImageType imageType, string token)
     {
         try
         {
@@ -329,7 +329,9 @@ public class ImageService
             {
                 imagePath = filePath,
                 UserModel = user,
-                userId = user.id
+                userId = user.id,
+                imageType = ImageType.Task,
+                
             };
             _context.ImageStorageModels.Add(image);
             await _context.SaveChangesAsync();
