@@ -1,5 +1,7 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
 using VecoBackend.Responses;
@@ -12,9 +14,10 @@ public class MaterialController : BaseController
 {
     private readonly MaterialService _materialService;
 
-    public MaterialController(MaterialService materialService)
+    public MaterialController(MaterialService materialService,ApplicationContext context)
     {
         _materialService = materialService;
+        materialService.AddContext(context);
     }
 
     [HttpGet]
@@ -38,10 +41,10 @@ public class MaterialController : BaseController
     }
 
     [HttpGet]
-    [Route("/materials/{category}")]
-    public async Task<ResponseModel<List<MaterialResponse>>> GetMaterialsByCategory(MaterialCategory category)
+    [Route("/materials/{id}/category")]
+    public async Task<ResponseModel<List<MaterialResponse>>> GetMaterialsByCategory(MaterialCategory id)
     {
-        var materials = await _materialService.GetMaterialsByCategory(category);
+        var materials = await _materialService.GetMaterialsByCategory(id);
         if (materials == null)
             return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Failed};
         return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Success, Data = materials};

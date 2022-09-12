@@ -98,7 +98,7 @@ public class MaterialService
             var Material = await (from material in _context.MaterialModels
                 join materialImage in _context.MaterialImageModels on material.Id equals materialImage.MaterialId
                 join image in _context.ImageStorageModels on materialImage.ImageId equals image.id
-                where material.IsSeen == true
+                where material.IsSeen == true && material.Id == id
                 orderby material.Id
                 select new
                 {

@@ -28,6 +28,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddSingleton<ImageService>();
 builder.Services.AddTransient<TimerService>();
 builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<MaterialService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
