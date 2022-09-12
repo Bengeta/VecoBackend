@@ -122,6 +122,7 @@ public class MaterialService
                 imagePaths = Material.Select(x => Path.Combine(_hostingEnvironment.WebRootPath, x.imagePath)).ToList(),
                 imageTypes = Material.Select(x => x.imageType).ToList()
             };
+
             return ans;
         }
         catch (Exception e)
@@ -131,7 +132,7 @@ public class MaterialService
         }
     }
 
-    public async Task<List<MaterialResponse>> GetMaterials()
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterials(int page,int pageSize)
     {
         try
         {
@@ -151,17 +152,17 @@ public class MaterialService
                     Image.imagePath,
                     Image.imageType
                 }).ToListAsync();
-            var ans = new List<MaterialResponse>();
+            var list = new List<MaterialResponse>();
             var prevId = 0;
             foreach (var material in materials)
                 if (material.Id == prevId)
                 {
-                    ans[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
-                    ans[^1].imageTypes.Add(material.imageType);
+                    list[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
+                    list[^1].imageTypes.Add(material.imageType);
                 }
                 else
                 {
-                    ans.Add(new MaterialResponse()
+                    list.Add(new MaterialResponse()
                     {
                         Id = material.Id,
                         Title = material.Title,
@@ -176,8 +177,7 @@ public class MaterialService
                     prevId = material.Id;
                 }
 
-            ;
-            return ans;
+            return GetPagedMaterials(list, page,pageSize);
         }
         catch (Exception e)
         {
@@ -186,7 +186,7 @@ public class MaterialService
         }
     }
 
-    public async Task<List<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category)
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category,int page,int pageSize)
     {
         try
         {
@@ -206,17 +206,17 @@ public class MaterialService
                     Image.imagePath,
                     Image.imageType
                 }).ToListAsync();
-            var ans = new List<MaterialResponse>();
+            var list = new List<MaterialResponse>();
             var prevId = 0;
             foreach (var material in materials)
                 if (material.Id == prevId)
                 {
-                    ans[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
-                    ans[^1].imageTypes.Add(material.imageType);
+                    list[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
+                    list[^1].imageTypes.Add(material.imageType);
                 }
                 else
                 {
-                    ans.Add(new MaterialResponse()
+                    list.Add(new MaterialResponse()
                     {
                         Id = material.Id,
                         Title = material.Title,
@@ -231,13 +231,22 @@ public class MaterialService
                     prevId = material.Id;
                 }
 
-            ;
-            return ans;
+            return GetPagedMaterials(list, page,pageSize);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             return null;
         }
+    }
+
+    private PaginatedListModel<MaterialResponse> GetPagedMaterials(List<MaterialResponse> materials, int page,int pagesize)
+    {
+        var answer = PagedList<MaterialResponse>.ToPagedList(materials, page);
+        return new PaginatedListModel<MaterialResponse>()
+        {
+            countPage = answer.TotalPages, currentPage = answer.CurrentPage, data = answer.ToList(),
+            isNext = answer.HasNext
+        };
     }
 }

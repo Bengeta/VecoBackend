@@ -1,33 +1,35 @@
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VecoBackend.Data;
 using VecoBackend.Enums;
 using VecoBackend.Models;
+using VecoBackend.Requests;
 using VecoBackend.Responses;
 using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
+
 [ApiController]
 [Authorize]
 public class MaterialController : BaseController
 {
     private readonly MaterialService _materialService;
 
-    public MaterialController(MaterialService materialService,ApplicationContext context)
+    public MaterialController(MaterialService materialService, ApplicationContext context)
     {
         _materialService = materialService;
         materialService.AddContext(context);
     }
 
     [HttpGet]
-    [Route("/materials")]
-    public async Task<ResponseModel<List<MaterialResponse>>> GetMaterials()
+    [Route("/materials/pages/{page}/{pageSize}")]
+    public async Task<ResponseModel<PaginatedListModel<MaterialResponse>>> GetMaterials(int page,int pageSize)
     {
-        var materials = await _materialService.GetMaterials();
+        var materials = await _materialService.GetMaterials(page,pageSize);
         if (materials == null)
-            return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Success, Data = materials};
+            return new ResponseModel<PaginatedListModel<MaterialResponse>> {ResultCode = ResultCode.Failed};
+        return new ResponseModel<PaginatedListModel<MaterialResponse>>
+            {ResultCode = ResultCode.Success, Data = materials};
     }
 
     [HttpGet]
@@ -41,12 +43,14 @@ public class MaterialController : BaseController
     }
 
     [HttpGet]
-    [Route("/materials/{id}/category")]
-    public async Task<ResponseModel<List<MaterialResponse>>> GetMaterialsByCategory(MaterialCategory id)
+    [Route("/materials/{category}/pages/{page}/{pageSize}")]
+    public async Task<ResponseModel<PaginatedListModel<MaterialResponse>>> GetMaterialsByCategory(MaterialCategory category,
+        int page,int pageSize)
     {
-        var materials = await _materialService.GetMaterialsByCategory(id);
+        var materials = await _materialService.GetMaterialsByCategory(category, page,pageSize);
         if (materials == null)
-            return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Failed};
-        return new ResponseModel<List<MaterialResponse>> {ResultCode = ResultCode.Success, Data = materials};
+            return new ResponseModel<PaginatedListModel<MaterialResponse>> {ResultCode = ResultCode.Failed};
+        return new ResponseModel<PaginatedListModel<MaterialResponse>>
+            {ResultCode = ResultCode.Success, Data = materials};
     }
 }
