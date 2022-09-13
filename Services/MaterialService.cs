@@ -91,7 +91,7 @@ public class MaterialService
         }
     }
 
-    public async Task<MaterialResponse> GetMaterial(int id)
+    public async Task<MaterialResponse> GetMaterial(int id,string baseUrl)
     {
         try
         {
@@ -119,7 +119,7 @@ public class MaterialService
                 Author = Material[0].Author,
                 Date = Converter.ToUnixTime(Material[0].Date),
                 Category = Material[0].Category,
-                imagePaths = Material.Select(x => Path.Combine(_hostingEnvironment.WebRootPath, x.imagePath)).ToList(),
+                imagePaths = Material.Select(x => Path.Combine(baseUrl, x.imagePath)).ToList(),
                 imageTypes = Material.Select(x => x.imageType).ToList()
             };
 
@@ -132,7 +132,7 @@ public class MaterialService
         }
     }
 
-    public async Task<PaginatedListModel<MaterialResponse>> GetMaterials(int page,int pageSize)
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterials(int page,int pageSize,string baseUrl)
     {
         try
         {
@@ -157,7 +157,7 @@ public class MaterialService
             foreach (var material in materials)
                 if (material.Id == prevId)
                 {
-                    list[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
+                    list[^1].imagePaths.Add(Path.Combine(baseUrl, material.imagePath));
                     list[^1].imageTypes.Add(material.imageType);
                 }
                 else
@@ -171,7 +171,7 @@ public class MaterialService
                         Date = Converter.ToUnixTime(material.Date),
                         Category = material.Category,
                         imagePaths = new List<string>()
-                            {Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath)},
+                            {Path.Combine(baseUrl, material.imagePath)},
                         imageTypes = new List<ImageType>() {material.imageType}
                     });
                     prevId = material.Id;
@@ -186,7 +186,7 @@ public class MaterialService
         }
     }
 
-    public async Task<PaginatedListModel<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category,int page,int pageSize)
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category,int page,int pageSize,string baseUrl)
     {
         try
         {
@@ -211,7 +211,7 @@ public class MaterialService
             foreach (var material in materials)
                 if (material.Id == prevId)
                 {
-                    list[^1].imagePaths.Add(Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath));
+                    list[^1].imagePaths.Add(Path.Combine(baseUrl, material.imagePath));
                     list[^1].imageTypes.Add(material.imageType);
                 }
                 else
@@ -225,7 +225,7 @@ public class MaterialService
                         Date = Converter.ToUnixTime(material.Date),
                         Category = material.Category,
                         imagePaths = new List<string>()
-                            {Path.Combine(_hostingEnvironment.WebRootPath, material.imagePath)},
+                            {Path.Combine(baseUrl, material.imagePath)},
                         imageTypes = new List<ImageType>() {material.imageType}
                     });
                     prevId = material.Id;
