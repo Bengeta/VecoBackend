@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 using VecoBackend.Data;
 using VecoBackend.Interfaces;
@@ -62,9 +63,8 @@ public class ImageService
                 filePath = Path.Combine(folderPath, fileName);
             } while (File.Exists(filePath));
 
-            //Resize(image, imageProfile);
-            //Crop(image, imageProfile);
-            image.Save(filePath, new JpegEncoder {Quality = 75});
+            image.Save(filePath, new WebpEncoder());
+            
 
             var fileUrl = Path.Combine(imageProfile.Folder, fileName);
             var imgId = await SaveImageToDb(fileUrl, token);
@@ -287,7 +287,7 @@ public class ImageService
     private string GenerateFileName(IFormFile file)
     {
         var fileExtension = Path.GetExtension(file.FileName);
-        var fileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+        var fileName = Guid.NewGuid().ToString();
 
         return $"{fileName}{fileExtension}";
     }
@@ -327,9 +327,9 @@ public class ImageService
             var user = await _context.UserModels.Where(u => u.token == token).FirstOrDefaultAsync();
             var image = new ImageStorageModel()
             {
-                imagePath = filePath,
-                UserModel = user,
                 userId = user.id,
+                UserModel = user,
+                imagePath = filePath,
                 imageType = ImageType.Task,
                 
             };

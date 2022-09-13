@@ -30,97 +30,12 @@ public class ApplicationContextSeeder
         _applicationContext.MaterialImageModels.RemoveRange(_applicationContext.MaterialImageModels);
         _applicationContext.SaveChanges();
 
-        var materialImages = new List<MaterialImageModel>()
-        {
-            new MaterialImageModel()
-            {
-                Id = 1,
-                MaterialId = 1,
-                ImageId = 4,
-            },
-        };
-        _applicationContext.MaterialImageModels.AddRange(materialImages);
-
-        var material = new List<MaterialModel>()
-        {
-            new MaterialModel()
-            {
-                Id = 1,
-                Title = "Жизнь IT-инженера в Эстонии: тотальная русскоязычность, прекрасная экология и низкие зарплаты",
-                Description = Strings.FirstSeederString,
-                Author = "Иван Иванов",
-                Date = new DateTime(2022, 8, 5),
-                IsSeen = true,
-                Category = MaterialCategory.Default,
-            }
-        };
-        _applicationContext.MaterialModels.AddRange(material);
-
-        var photosTask = new List<TaskImageModel>()
-        {
-            new TaskImageModel()
-            {
-                id = 1,
-                UserTaskId = 9,
-                imageId = 1
-            },
-            new TaskImageModel()
-            {
-                id = 2,
-                UserTaskId = 9,
-                imageId = 2
-            },
-            new TaskImageModel()
-            {
-                id = 3,
-                UserTaskId = 9,
-                imageId = 3
-            },
-        };
-        _applicationContext.TaskImageModels.AddRange(photosTask);
-        var photos = new List<ImageStorageModel>()
-        {
-            new ImageStorageModel()
-            {
-                id = 1,
-                userId = 3,
-                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
-                isUsed = true,
-                imageType = ImageType.Task,
-            },
-            new ImageStorageModel()
-            {
-                id = 2,
-                userId = 3,
-                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
-                isUsed = true,
-                imageType = ImageType.Task,
-            },
-            new ImageStorageModel()
-            {
-                id = 3,
-                userId = 3,
-                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
-                isUsed = true,
-                imageType = ImageType.Task,
-            },
-            new ImageStorageModel()
-            {
-                id = 4,
-                userId = 3,
-                imagePath = "boxes/image 1.png",
-                isUsed = true,
-                imageType = ImageType.Material,
-            },
-        };
-        _applicationContext.ImageStorageModels.AddRange(photos);
 
         var tasks = new List<TaskModel>();
         if (!_applicationContext.TaskModels.Any())
         {
             tasks.Add(new TaskModel()
             {
-                Id = 1,
                 Points = 200,
                 Title = "Сходить в магазин с собственной сумкой",
                 Description =
@@ -131,7 +46,6 @@ public class ApplicationContextSeeder
             });
             tasks.Add(new TaskModel()
             {
-                Id = 2,
                 Points = 800,
                 Title = "Сдать свой недельный мусор в пункт переработки",
                 Description = "собрать мусор за неделю и сдать в пункт переработки",
@@ -141,7 +55,6 @@ public class ApplicationContextSeeder
             });
             tasks.Add(new TaskModel()
             {
-                Id = 3,
                 Points = 2500,
                 Title = "Провести уборку в парке своего района",
                 Description =
@@ -158,7 +71,6 @@ public class ApplicationContextSeeder
         {
             users.Add(new UserModel()
             {
-                id = 1,
                 name = "Иван Иванов",
                 isAdmin = false,
                 token = "asdw",
@@ -168,7 +80,6 @@ public class ApplicationContextSeeder
             });
             users.Add(new UserModel()
             {
-                id = 2,
                 name = "Илья Ильин",
                 isAdmin = true,
                 token = "asdf",
@@ -179,7 +90,6 @@ public class ApplicationContextSeeder
             var pas = Hash.GenerateHash("asdf");
             users.Add(new UserModel()
             {
-                id = 3,
                 name = "Руслан Гасанов",
                 isAdmin = true,
                 token = "asdf",
@@ -204,18 +114,104 @@ public class ApplicationContextSeeder
             _applicationContext.UserModels.AddRange(users);
         }
 
+
+        var material = new List<MaterialModel>()
+        {
+            new MaterialModel()
+            {
+                Id = 1,
+                Title = "Жизнь IT-инженера в Эстонии: тотальная русскоязычность, прекрасная экология и низкие зарплаты",
+                Description = Strings.FirstSeederString,
+                Author = "Иван Иванов",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            }
+        };
+        _applicationContext.MaterialModels.AddRange(material);
+
+        _applicationContext.SaveChanges();
+
+        var photos = new List<ImageStorageModel>()
+        {
+            new ImageStorageModel()
+            {
+                userId = users.Last().id,
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
+                isUsed = true,
+                imageType = ImageType.Task,
+            },
+            new ImageStorageModel()
+            {
+                userId = users.Last().id,
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
+                isUsed = true,
+                imageType = ImageType.Task,
+            },
+            new ImageStorageModel()
+            {
+                userId = users.Last().id,
+                imagePath = "boxes/ArcoLinux_2022-03-10_14-25-27.png",
+                isUsed = true,
+                imageType = ImageType.Task,
+            },
+            new ImageStorageModel()
+            {
+                userId = users.Last().id,
+                imagePath = "boxes/image 1.png",
+                isUsed = true,
+                imageType = ImageType.Material,
+            },
+        };
+        _applicationContext.ImageStorageModels.AddRange(photos);
+
+        _applicationContext.SaveChanges();
+
+        var materialImages = new List<MaterialImageModel>()
+        {
+            new MaterialImageModel()
+            {
+                MaterialId = material.Last().Id,
+                ImageId = photos.Last().id,
+            },
+        };
+        _applicationContext.MaterialImageModels.AddRange(materialImages);
+        
         var users_tasks = new List<UserTaskModel>()
         {
             new UserTaskModel()
             {
-                Id = 9,
-                UserId = 3,
-                TaskId = 1,
+                UserId = users.Last().id,
+                TaskId = tasks.Last().Id,
                 taskStatus = TaskStatus.OnCheck,
             },
         };
         _applicationContext.UserTaskModels.AddRange(users_tasks);
+        _applicationContext.SaveChanges();
+
+        var photosTask = new List<TaskImageModel>()
+        {
+            new TaskImageModel()
+            {
+                UserTaskId = users_tasks.Last().Id,
+                imageId = photos[0].id
+            },
+            new TaskImageModel()
+            {
+                UserTaskId = users_tasks.Last().Id,
+                imageId = photos[1].id
+            },
+            new TaskImageModel()
+            {
+                UserTaskId = users_tasks.Last().Id,
+                imageId = photos[2].id
+            },
+        };
+        _applicationContext.TaskImageModels.AddRange(photosTask);
+
+
         
+
 
         _applicationContext.SaveChanges();
     }
