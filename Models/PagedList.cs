@@ -7,8 +7,8 @@ public class PagedList<T> : List<T>
     public int PageSize { get; private set; }
     public int TotalCount { get; private set; }
 
-    public bool HasPrevious => CurrentPage > 1;
-    public bool HasNext => CurrentPage < TotalPages;
+    public bool HasPrevious => CurrentPage > 0;
+    public bool HasNext => CurrentPage < TotalPages - 1;
 
     public PagedList(List<T> items, int count, int pageNumber, int pageSize)
     {
@@ -23,7 +23,7 @@ public class PagedList<T> : List<T>
     public static PagedList<T> ToPagedList(List<T> source, int pageNumber, int pageSize = 10)
     {
         var count = source.Count();
-        var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+        var items = source.Skip((pageNumber) * pageSize).Take(pageSize).ToList();
 
         return new PagedList<T>(items, count, pageNumber, pageSize);
     }
