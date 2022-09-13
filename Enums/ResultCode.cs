@@ -9,5 +9,6 @@ public enum ResultCode
     UserAlreadyExists,
     FileException,
     TaskNotFound,
+    ImageNotFound,
     
 }

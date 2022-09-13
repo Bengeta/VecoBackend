@@ -271,6 +271,8 @@ public class TaskService
                     join image in _context.ImageStorageModels on user.id equals image.userId
                     where user.token == token && !image.isUsed
                     select image).ToListAsync();
+            if(images.Count == 0)
+                return ResultCode.ImageNotFound;
             var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
             if(task == null)
                 return ResultCode.TaskNotFound;
