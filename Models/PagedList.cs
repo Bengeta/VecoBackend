@@ -20,7 +20,7 @@ public class PagedList<T> : List<T>
         AddRange(items);
     }
 
-    public static PagedList<T> ToPagedList(List<T> source, int pageNumber, int pageSize = 10)
+    public static PagedList<T> ToPagedList(List<T> source, int pageNumber, int pageSize)
     {
         var count = source.Count();
         var items = source.Skip((pageNumber) * pageSize).Take(pageSize).ToList();

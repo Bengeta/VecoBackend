@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+@using VecoBackend.Models
 @using VecoBackend
 @using VecoBackend.Shared
 @using SixLabors.ImageSharp
@@ -15,4 +16,7 @@
 @inject ApplicationContext applicationContext
 @inject ImageService _imageService
 @inject TaskService taskService
+@inject MaterialService materialService
 @inject NavigationManager NavigationManager
+@inject IWebHostEnvironment hostingEnvironment
+

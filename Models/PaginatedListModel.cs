@@ -6,4 +6,5 @@ public class PaginatedListModel<T>
     public int currentPage { get; set; }
     public int countPage { get; set; }
     public Boolean isNext { get; set; }
+    public Boolean isPrev { get; set; }
 }

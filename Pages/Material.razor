@@ -1,0 +1,85 @@
+@page "/Material/{id:int}"
+@using VecoBackend.Requests
+<h3>Material</h3>
+
+
+@if (MaterialResponse == null)
+{
+    <tr>Loading Data ...</tr>
+}
+else
+{
+    <label for="fname">Автор:</label>
+    <input type="text" @bind="@MaterialResponse.Author" @bind:event="oninput" placeholder="@MaterialResponse.Author" id="fname" name="fname"><br><br>
+    <form action="/action_page.php">
+      <label for="img">Выберите фото автора:</label>
+      <input type="file" id="img" name="img" accept="image/*">
+      <input type="submit">
+    </form>
+    <label for="lname">Заголовок:</label>
+    <input type="text" @bind="@MaterialResponse.Title" @bind:event="oninput" placeholder="@MaterialResponse.Title" id="lname" name="lname"><br><br>
+    <label for="lname">Дата Создания:</label>
+    <input type="Date" @bind="@MaterialResponse.Date" @bind:event="oninput" placeholder="@MaterialResponse.Date" id="lname" name="lname"><br><br>
+    <label for="lname">Текст:</label>
+    <textarea rows="30" cols="100" @bind="@MaterialResponse.Description" @bind:event="oninput"  placeholder=@MaterialResponse.Description></textarea><br><br>
+    <label for="lname">Категория:</label>
+    <input type="text" @bind="@MaterialResponse.Category" @bind:event="oninput" placeholder="@MaterialResponse.Category" id="lname" name="lname"><br><br>
+
+    if(id != -1)
+    {
+    <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+    }
+    else
+    {
+    <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
+    }
+
+    }
+
+
+    @code {
+
+        [Parameter]
+        public int id { get; set; }
+
+        private MaterialResponse MaterialResponse = new MaterialResponse();
+
+        protected override async Task OnInitializedAsync()
+        {
+            materialService.AddContext(applicationContext);
+            var material = await materialService.GetMaterial(id, hostingEnvironment.WebRootPath);
+            if (material != null)
+                MaterialResponse = material;
+            else
+                MaterialResponse.Id = -1;
+        }
+
+        private async Task UpdateMaterial()
+        {
+        //   await materialService.UpdateMaterial(MaterialResponse, hostingEnvironment.WebRootPath);
+        }
+
+        private async Task CreateMaterial()
+        {
+           // await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse), hostingEnvironment.WebRootPath);
+        }
+
+        private MaterialCreateRequest MakeMaterialRequest(MaterialResponse materialResponse)
+        {
+            MaterialCreateRequest materialCreateRequest = new MaterialCreateRequest();
+            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
+            materialCreateRequest.Author = materialResponse.Author;
+            materialCreateRequest.Title = materialResponse.Title;
+            materialCreateRequest.Description = materialResponse.Description;
+            materialCreateRequest.Category = materialResponse.Category;
+            return materialCreateRequest;
+        }
+
+        /*private async Task<int> UploadImage()
+        {
+            
+        }*/
+
+    }
+

@@ -13,7 +13,7 @@ public class MaterialService
     private ApplicationContext _context;
     private readonly IWebHostEnvironment _hostingEnvironment;
 
-    public MaterialService(IWebHostEnvironment webHostEnvironment, IWebHostEnvironment hostingEnvironment)
+    public MaterialService(IWebHostEnvironment hostingEnvironment)
     {
         _hostingEnvironment = hostingEnvironment;
     }
@@ -242,11 +242,11 @@ public class MaterialService
 
     private PaginatedListModel<MaterialResponse> GetPagedMaterials(List<MaterialResponse> materials, int page,int pagesize)
     {
-        var answer = PagedList<MaterialResponse>.ToPagedList(materials, page);
+        var answer = PagedList<MaterialResponse>.ToPagedList(materials, page, pagesize);
         return new PaginatedListModel<MaterialResponse>()
         {
             countPage = answer.TotalPages, currentPage = answer.CurrentPage, data = answer.ToList(),
-            isNext = answer.HasNext
+            isNext = answer.HasNext, isPrev = answer.HasPrevious
         };
     }
 }

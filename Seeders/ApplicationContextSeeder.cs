@@ -119,14 +119,94 @@ public class ApplicationContextSeeder
         {
             new MaterialModel()
             {
-                Id = 1,
                 Title = "Жизнь IT-инженера в Эстонии: тотальная русскоязычность, прекрасная экология и низкие зарплаты",
                 Description = Strings.FirstSeederString,
                 Author = "Иван Иванов",
                 Date = new DateTime(2022, 8, 5),
                 IsSeen = true,
                 Category = MaterialCategory.Default,
-            }
+            },
+            new MaterialModel()
+            {
+                Title = "Как стать программистом",
+                Description = Strings.FirstSeederString,
+                Author = "Илья Ильин",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как полюбить Путена",
+                Description = Strings.FirstSeederString,
+                Author = "Михаил Михайлов",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как понять, что ты не программист",
+                Description = Strings.FirstSeederString,
+                Author = "Руслан Арибжанов",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как сделать свой первый сайт",
+                Description = Strings.FirstSeederString,
+                Author = "Алишер Алишеров",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как понять что пора сменить работу",
+                Description = Strings.FirstSeederString,
+                Author = "Владимир Владимирович",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как украсть пароль от банковской карты",
+                Description = Strings.FirstSeederString,
+                Author = "Илона Маск",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как научится говорить дохуя",
+                Description = Strings.FirstSeederString,
+                Author = "Александр Кленин",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "Как правильно валить лес",
+                Description = Strings.FirstSeederString,
+                Author = "Иосиф Сталин",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
+            new MaterialModel()
+            {
+                Title = "За что я люблю дубы",
+                Description = Strings.FirstSeederString,
+                Author = "Лев Толстой",
+                Date = new DateTime(2022, 8, 5),
+                IsSeen = true,
+                Category = MaterialCategory.Default,
+            },
         };
         _applicationContext.MaterialModels.AddRange(material);
 
@@ -167,16 +247,19 @@ public class ApplicationContextSeeder
 
         _applicationContext.SaveChanges();
 
-        var materialImages = new List<MaterialImageModel>()
+        var materialImages = new List<MaterialImageModel>();
+        material.ForEach(m =>
         {
-            new MaterialImageModel()
-            {
-                MaterialId = material.Last().Id,
-                ImageId = photos.Last().id,
-            },
-        };
+            materialImages.Add(
+                new MaterialImageModel()
+                {
+                    MaterialId = m.Id,
+                    ImageId = photos.Last().id
+                });
+        });
+
         _applicationContext.MaterialImageModels.AddRange(materialImages);
-        
+
         var users_tasks = new List<UserTaskModel>()
         {
             new UserTaskModel()
@@ -208,9 +291,6 @@ public class ApplicationContextSeeder
             },
         };
         _applicationContext.TaskImageModels.AddRange(photosTask);
-
-
-        
 
 
         _applicationContext.SaveChanges();
