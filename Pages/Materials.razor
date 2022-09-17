@@ -1,5 +1,4 @@
 @page "/Materials"
-
 <h3>Materials</h3>
 <head>
     <style>
@@ -31,54 +30,63 @@
 </head>
 
 <body>
-<div class="table-responsible">
-    <table class="table table-stripped">
-        <thead class="thead-light">
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>CreateOn</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if (MaterListResponses == null)
-        {
-            <tr>Loading Data ...</tr>
-        }
-        else
-        {
-            @foreach (var material in MaterListResponses.data)
+@if (State!=null && State.Identity.Name!="Anonymous")
+{
+    <div class="table-responsible">
+        <table class="table table-stripped">
+            <thead class="thead-light">
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>CreateOn</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (MaterListResponses == null)
             {
-                <tr @onclick="() => OpenMaterial(material.Id)">
-                    <td>
-                        @material.Title
-                    </td>
-                    <td>
-                        @material.Author
-                    </td>
-                    <td>
-                        @material.Date
-                    </td>
-                </tr>
+                <tr>Loading Data ...</tr>
             }
-        }
-        </tbody>
-        <button class="previous round" @onclick="PreviousPage">&#8249;</button>
-        <button class="next round"  @onclick="NextPage">&#8250;</button>
-    </table>
-    
-        <button class="btn btn-info"  @onclick="AddMaterial">Добавить Материал</button>
-</div>
-</body>
+            else
+            {
+                @foreach (var material in MaterListResponses.data)
+                {
+                    <tr @onclick="() => OpenMaterial(material.Id)">
+                        <td>
+                            @material.Title
+                        </td>
+                        <td>
+                            @material.Author
+                        </td>
+                        <td>
+                            @material.Date
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+            <button class="previous round" @onclick="PreviousPage">&#8249;</button>
+            <button class="next round" @onclick="NextPage">&#8250;</button>
+        </table>
 
+        <button class="btn btn-info" @onclick="AddMaterial">Добавить Материал</button>
+    </div>
+   
+}
+ </body>
 
 @code {
     private PaginatedListModel<MaterialResponse> MaterListResponses { get; set; }
+    private ClaimsPrincipal State { get; set; }
     private int Page { get; set; } = 0;
     private int PageSize { get; set; } = 2;
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Identity.IsAuthenticated)
+            return;
+        State = state.User;
+
         materialService.AddContext(applicationContext);
         MaterListResponses = await materialService.GetMaterials(Page, PageSize, hostingEnvironment.WebRootPath);
     }
@@ -90,7 +98,7 @@
 
     protected async Task NextPage()
     {
-        if(!MaterListResponses.isNext)
+        if (!MaterListResponses.isNext)
             return;
         Page++;
         MaterListResponses = await materialService.GetMaterials(Page, PageSize, hostingEnvironment.WebRootPath);
@@ -98,12 +106,12 @@
 
     protected async Task PreviousPage()
     {
-        if(!MaterListResponses.isPrev)
+        if (!MaterListResponses.isPrev)
             return;
         Page--;
         MaterListResponses = await materialService.GetMaterials(Page, PageSize, hostingEnvironment.WebRootPath);
     }
-    
+
     protected void AddMaterial()
     {
         NavigationManager.NavigateTo($"/Material/{-1}");

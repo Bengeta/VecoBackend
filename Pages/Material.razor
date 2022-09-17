@@ -1,8 +1,9 @@
 @page "/Material/{id:int}"
-@using VecoBackend.Requests
+
 <h3>Material</h3>
 
-
+@if (State != null && State.Identity.Name != "Anonymous")
+{
 @if (MaterialResponse == null)
 {
     <tr>Loading Data ...</tr>
@@ -12,9 +13,9 @@ else
     <label for="fname">Автор:</label>
     <input type="text" @bind="@MaterialResponse.Author" @bind:event="oninput" placeholder="@MaterialResponse.Author" id="fname" name="fname"><br><br>
     <form action="/action_page.php">
-      <label for="img">Выберите фото автора:</label>
-      <input type="file" id="img" name="img" accept="image/*">
-      <input type="submit">
+        <label for="img">Выберите фото автора:</label>
+        <input type="file" id="img" name="img" accept="image/*">
+        <input type="submit">
     </form>
     <label for="lname">Заголовок:</label>
     <input type="text" @bind="@MaterialResponse.Title" @bind:event="oninput" placeholder="@MaterialResponse.Title" id="lname" name="lname"><br><br>
@@ -25,16 +26,18 @@ else
     <label for="lname">Категория:</label>
     <input type="text" @bind="@MaterialResponse.Category" @bind:event="oninput" placeholder="@MaterialResponse.Category" id="lname" name="lname"><br><br>
 
-    if(id != -1)
+    @if (id != -1)
     {
-    <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+        <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
     }
     else
     {
-    <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
+        <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
     }
 
     }
+    }
+
 
 
     @code {
@@ -43,9 +46,15 @@ else
         public int id { get; set; }
 
         private MaterialResponse MaterialResponse = new MaterialResponse();
+        private ClaimsPrincipal State { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (!state.User.Identity.IsAuthenticated)
+                return;
+            State = state.User;
+
             materialService.AddContext(applicationContext);
             var material = await materialService.GetMaterial(id, hostingEnvironment.WebRootPath);
             if (material != null)
@@ -61,7 +70,7 @@ else
 
         private async Task CreateMaterial()
         {
-           // await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse), hostingEnvironment.WebRootPath);
+        // await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse), hostingEnvironment.WebRootPath);
         }
 
         private MaterialCreateRequest MakeMaterialRequest(MaterialResponse materialResponse)
@@ -82,4 +91,4 @@ else
         }*/
 
     }
-
+    

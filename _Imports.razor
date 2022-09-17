@@ -1,8 +1,11 @@
 ﻿@using System.Net.Http
+@using a
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
+@using VecoBackend.Requests
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
@@ -10,6 +13,7 @@
 @using VecoBackend
 @using VecoBackend.Shared
 @using SixLabors.ImageSharp
+@using VecoBackend.Authentication
 @using VecoBackend.Data
 @using VecoBackend.Responses
 @using VecoBackend.Services
@@ -17,6 +21,9 @@
 @inject ImageService _imageService
 @inject TaskService taskService
 @inject MaterialService materialService
+@inject UserService userService
 @inject NavigationManager NavigationManager
 @inject IWebHostEnvironment hostingEnvironment
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime jsRuntime
 

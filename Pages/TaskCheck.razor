@@ -1,42 +1,51 @@
 @page "/TaskCheck/{taskId:int}"
 <h3>TaskCheck</h3>
-<div class="table-responsible">
-    <table class="table table-stripped">
-        <thead class="thead-light">
-        <tr>
-            <th>photo</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if (ImageSetResponse == null)
-        {
-            <tr>Loading Data ...</tr>
-        }
-        else
-        {
-            @foreach (var path in ImageSetResponse.ImagePaths)
-            {
-                <tr>
-                    <td>
-                        <img src=@path alt="Flowers in Chania" width="100" height="100">
-                    </td>
-                </tr>
-            }
-        }
-        </tbody>
-    </table>
-    <button class="btn btn-success" @onclick="Accept">Accept</button>
-    <button class="btn btn-danger" @onclick="Deny">Deny</button>
-</div>
 
+@if (State != null && State.Identity.Name != "Anonymous")
+{
+    <div class="table-responsible">
+        <table class="table table-stripped">
+            <thead class="thead-light">
+            <tr>
+                <th>photo</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (ImageSetResponse == null)
+            {
+                <tr>Loading Data ...</tr>
+            }
+            else
+            {
+                @foreach (var path in ImageSetResponse.ImagePaths)
+                {
+                    <tr>
+                        <td>
+                            <img src=@path alt="Flowers in Chania" width="100" height="100">
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+        <button class="btn btn-success" @onclick="Accept">Accept</button>
+        <button class="btn btn-danger" @onclick="Deny">Deny</button>
+    </div>
+}
 
 @code {
     [Parameter]
     public int taskId { get; set; }
     private ImageSetResponse ImageSetResponse { get; set; }
+    private ClaimsPrincipal State { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Identity.IsAuthenticated)
+            return;
+        State = state.User;
+        
         _imageService.AddContext(applicationContext);
         var imageResponse = await _imageService.CheckImageTask(taskId);
         ImageSetResponse = imageResponse;

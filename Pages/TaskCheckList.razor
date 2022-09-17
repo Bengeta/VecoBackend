@@ -1,45 +1,55 @@
 @page "/TaskCheckList"
 <h3>TaskCheckList</h3>
-<div class="table-responsible">
-    <table class="table table-stripped">
-        <thead class="thead-light">
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Points</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if (CheckTaskListResponses == null)
-        {
-            <tr>Loading Data ...</tr>
-        }
-        else
-        {
-            @foreach (var task in CheckTaskListResponses)
+
+@if (State != null && State.Identity.Name != "Anonymous")
+{
+    <div class="table-responsible">
+        <table class="table table-stripped">
+            <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Points</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (CheckTaskListResponses == null)
             {
-                <tr @onclick="() => OpenTaskCheck(task.userTaskId)">
-                    <td>
-                        @task.UserName
-                    </td>
-                    <td>
-                        @task.title
-                    </td>
-                    <td>
-                        @task.points
-                    </td>
-                </tr>
+                <tr>Loading Data ...</tr>
             }
-        }
-        </tbody>
-    </table>
-</div>
+            else
+            {
+                @foreach (var task in CheckTaskListResponses)
+                {
+                    <tr @onclick="() => OpenTaskCheck(task.userTaskId)">
+                        <td>
+                            @task.UserName
+                        </td>
+                        <td>
+                            @task.title
+                        </td>
+                        <td>
+                            @task.points
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+}
 
 @code {
     private List<CheckTaskListResponse> CheckTaskListResponses { get; set; }
+    private ClaimsPrincipal State { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Identity.IsAuthenticated)
+            return;
+        State = state.User;
+
         taskService.AddContext(applicationContext);
         var imageResponse = await taskService.GetCheckTaskList();
         CheckTaskListResponses = imageResponse;
