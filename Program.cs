@@ -34,21 +34,22 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+    provider.GetRequiredService<CustomAuthenticationStateProvider>());
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddSingleton<ImageService>();
+builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<TimerService>();
-builder.Services.AddSingleton<TaskService>();
-builder.Services.AddSingleton<MaterialService>();
-builder.Services.AddSingleton<NotificationService>();
-builder.Services.AddSingleton<UserService>();
+builder.Services.AddTransient<ITaskService, TaskService>();
+builder.Services.AddTransient<IMaterialService, MaterialService>();
+builder.Services.AddTransient<NotificationService>();
+builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IImageProfile, BoxImageProfileModel>();
 builder.Services.AddTransient<IImageProfile, LogoImageProfileModel>();
 
 var connection = builder.Configuration.GetConnectionString("MainDB");
 builder.Services.AddTransient<ApplicationContextSeeder>();
 
-builder.Services.AddDbContextFactory<ApplicationContext>(x => x.UseNpgsql(connection));
+builder.Services.AddDbContext<ApplicationContext>(x => x.UseNpgsql(connection));
 
 builder.Services.AddAuthentication(options =>
     {
@@ -72,7 +73,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo() { Title = "You api title", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo() {Title = "You api title", Version = "v1"});
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
@@ -98,16 +99,14 @@ builder.Services.AddSwaggerGen(c =>
                 Scheme = "Bearer",
                 Name = "Bearer",
                 In = ParameterLocation.Header,
-
             },
-            new string[]{}
+            new string[] { }
         }
     });
 });
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddCoreAdmin();
-builder.Services.AddSingleton<TaskService>();
 var app = builder.Build();
 
 

@@ -2,10 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
-using VecoBackend.Requests;
 using VecoBackend.Responses;
-using VecoBackend.Services;
 
 namespace VecoBackend.Controllers;
 
@@ -13,13 +12,12 @@ namespace VecoBackend.Controllers;
 [Authorize]
 public class MaterialController : BaseController
 {
-    private readonly MaterialService _materialService;
+    private readonly IMaterialService _materialService;
     
 
-    public MaterialController(MaterialService materialService, ApplicationContext context)
+    public MaterialController(IMaterialService materialService)
     {
         _materialService = materialService;
-        materialService.AddContext(context);
     }
 
     [HttpGet]

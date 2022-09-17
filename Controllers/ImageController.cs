@@ -4,6 +4,7 @@ using Microsoft.Net.Http.Headers;
 using SixLabors.ImageSharp;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Requests;
 using VecoBackend.Responses;
@@ -15,12 +16,11 @@ namespace VecoBackend.Controllers;
 [Authorize]
 public class ImageController : BaseController
 {
-    private ImageService _imageService;
+    private IImageService _imageService;
 
-    public ImageController(ImageService imageService, ApplicationContext context)
+    public ImageController(IImageService imageService)
     {
         _imageService = imageService;
-        imageService.AddContext(context);
     }
 
     [HttpPost]

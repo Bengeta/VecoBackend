@@ -7,13 +7,13 @@ namespace VecoBackend.Services;
 
 public class TimerService
 {
-    private readonly IDbContextFactory<ApplicationContext> _contextFactory;
+    private readonly ApplicationContext context;
     private readonly IWebHostEnvironment _hostEnvironment;
 
-    public TimerService(IDbContextFactory<ApplicationContext> contextFactory,
+    public TimerService(ApplicationContext context,
         IWebHostEnvironment hostingEnvironment)
     {
-        _contextFactory = contextFactory;
+        context = this.context;
         _hostEnvironment = hostingEnvironment;
     }
 
@@ -43,7 +43,6 @@ public class TimerService
     {
         try
         {
-            await using var context = await _contextFactory.CreateDbContextAsync();
             var items = await (
                 from userTask in context.UserTaskModels
                 join task in context.TaskModels on userTask.TaskId equals task.Id
@@ -101,7 +100,6 @@ public class TimerService
     {
         try
         {
-            await using var context = await _contextFactory.CreateDbContextAsync();
             var userTasks = await context.UserTaskModels
                 .Where(x => x.taskStatus == TaskStatus.Finished && x.DeleteTime <= DateTime.Today)
                 .ToListAsync();

@@ -46,7 +46,6 @@
             return;
         State = state.User;
         
-        _imageService.AddContext(applicationContext);
         var imageResponse = await _imageService.CheckImageTask(taskId);
         ImageSetResponse = imageResponse;
     }

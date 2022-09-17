@@ -87,7 +87,6 @@
             return;
         State = state.User;
 
-        materialService.AddContext(applicationContext);
         MaterListResponses = await materialService.GetMaterials(Page, PageSize, hostingEnvironment.WebRootPath);
     }
 

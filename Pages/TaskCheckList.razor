@@ -50,7 +50,6 @@
             return;
         State = state.User;
 
-        taskService.AddContext(applicationContext);
         var imageResponse = await taskService.GetCheckTaskList();
         CheckTaskListResponses = imageResponse;
     }

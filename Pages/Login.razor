@@ -37,7 +37,6 @@
     {
         try
         {
-            userService.AddContext(applicationContext);
             var tokenResponse = await userService.Login(model.Email, model.Password);
             if (tokenResponse.ResultCode != ResultCode.Success)
             {
@@ -56,7 +55,7 @@
                     Role = user.Data.isAdmin ? "Admin" : "User"
                 });
             await customAuthStateProvider.GetAuthenticationStateAsync();
-            NavigationManager.NavigateTo("/home", true);
+            NavigationManager.NavigateTo("/Materials", true);
         }
 
         catch (Exception e)

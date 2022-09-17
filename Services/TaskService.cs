@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Responses;
 using VecoBackend.Utils;
@@ -11,19 +12,15 @@ using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Services;
 
-public class TaskService
+public class TaskService:ITaskService
 {
     private ApplicationContext _context;
     private readonly IWebHostEnvironment _hostingEnvironment;
 
-    public TaskService(IWebHostEnvironment webHostEnvironment, IWebHostEnvironment hostingEnvironment)
+    public TaskService(ApplicationContext context, IWebHostEnvironment hostingEnvironment)
     {
         _hostingEnvironment = hostingEnvironment;
-    }
-
-    public void AddContext(ApplicationContext applicationContext)
-    {
-        _context = applicationContext;
+        _context = context;
     }
 
     public async Task<List<GetTaskResponse>> GetAllTasks(string token)
@@ -271,10 +268,10 @@ public class TaskService
                     join image in _context.ImageStorageModels on user.id equals image.userId
                     where user.token == token && !image.isUsed
                     select image).ToListAsync();
-            if(images.Count == 0)
+            if (images.Count == 0)
                 return ResultCode.ImageNotFound;
             var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
-            if(task == null)
+            if (task == null)
                 return ResultCode.TaskNotFound;
             var userTask = await _context.UserTaskModels.FirstOrDefaultAsync(u =>
                 u.UserId == images[0].userId && u.TaskId == taskId);

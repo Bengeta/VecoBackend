@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Requests;
 using VecoBackend.Responses;
@@ -8,19 +9,15 @@ using VecoBackend.Utils;
 
 namespace VecoBackend.Services;
 
-public class MaterialService
+public class MaterialService:IMaterialService
 {
     private ApplicationContext _context;
     private readonly IWebHostEnvironment _hostingEnvironment;
 
-    public MaterialService(IWebHostEnvironment hostingEnvironment)
+    public MaterialService(IWebHostEnvironment hostingEnvironment, ApplicationContext context)
     {
         _hostingEnvironment = hostingEnvironment;
-    }
-
-    public void AddContext(ApplicationContext applicationContext)
-    {
-        _context = applicationContext;
+        _context = context;
     }
 
     public async Task<bool> CreateMaterial(MaterialCreateRequest material)
@@ -90,6 +87,7 @@ public class MaterialService
             return false;
         }
     }
+    
 
     public async Task<MaterialResponse> GetMaterial(int id,string baseUrl)
     {

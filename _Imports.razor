@@ -15,13 +15,14 @@
 @using SixLabors.ImageSharp
 @using VecoBackend.Authentication
 @using VecoBackend.Data
+@using VecoBackend.Interfaces
 @using VecoBackend.Responses
 @using VecoBackend.Services
 @inject ApplicationContext applicationContext
-@inject ImageService _imageService
-@inject TaskService taskService
-@inject MaterialService materialService
-@inject UserService userService
+@inject IImageService _imageService
+@inject ITaskService taskService
+@inject IMaterialService materialService
+@inject IUserService userService
 @inject NavigationManager NavigationManager
 @inject IWebHostEnvironment hostingEnvironment
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider

@@ -12,7 +12,7 @@ using VecoBackend.Responses;
 
 namespace VecoBackend.Services;
 
-public class ImageService
+public class ImageService:IImageService
 {
     private readonly IEnumerable<IImageProfile> _imageProfiles;
     private readonly IWebHostEnvironment _hostingEnvironment;
@@ -20,16 +20,12 @@ public class ImageService
     private NotificationService _notificationService;
 
     public ImageService(IEnumerable<IImageProfile> imageProfiles, IWebHostEnvironment webHostEnvironment,
-        NotificationService notificationService)
+        NotificationService notificationService, ApplicationContext context)
     {
         _imageProfiles = imageProfiles;
         _hostingEnvironment = webHostEnvironment;
-        this._notificationService = notificationService;
-    }
-
-    public void AddContext(ApplicationContext applicationContext)
-    {
-        _context = applicationContext;
+        _notificationService = notificationService;
+        _context = context;
     }
 
     public async Task<ResponseModel<int>> SaveImage(IFormFile file, SaveImageType imageType, string token)
@@ -116,7 +112,7 @@ public class ImageService
         }
     }
 
-    public async Task<ResultCode> DeleteImageTask(int userTaskId, string token = "asdf")
+    public async Task<ResultCode> DeleteImageTask(int userTaskId)
     {
         try
         {
@@ -126,7 +122,7 @@ public class ImageService
                     join task in _context.TaskModels on userTask.TaskId equals task.Id
                     join imageTask in _context.TaskImageModels on userTask.Id equals imageTask.UserTaskId
                     join image in _context.ImageStorageModels on imageTask.imageId equals image.id
-                    where (usr.token == token || usr.isAdmin) && userTask.Id == userTaskId
+                    where  userTask.Id == userTaskId
                     select image).ToListAsync();
             var imageTasks =
                 await (from imageTask in _context.TaskImageModels
@@ -152,7 +148,7 @@ public class ImageService
         }
     }
 
-    public async Task<List<string>> GetImageTask(int userTaskId, string token = "asdf")
+    public async Task<List<string>> GetImageTask(int userTaskId)
     {
         try
         {
@@ -162,7 +158,7 @@ public class ImageService
                     join task in _context.TaskModels on userTask.TaskId equals task.Id
                     join photos in _context.TaskImageModels on userTask.Id equals photos.UserTaskId
                     join image in _context.ImageStorageModels on photos.imageId equals image.id
-                    where (usr.token == token || usr.isAdmin) && userTask.Id == userTaskId
+                    where userTask.Id == userTaskId
                     select image).ToListAsync();
             var boxImages = new List<string>();
             foreach (var image in images)

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Requests;
 using VecoBackend.Responses;
@@ -17,12 +18,11 @@ namespace VecoBackend.Controllers;
 [Authorize]
 public class TaskController : BaseController
 {
-    private readonly TaskService _taskService;
+    private readonly ITaskService _taskService;
 
-    public TaskController(TaskService taskService, ApplicationContext _applicationContext)
+    public TaskController(ITaskService taskService)
     {
         _taskService = taskService;
-        taskService.AddContext(_applicationContext);
     }
 
     [HttpGet]

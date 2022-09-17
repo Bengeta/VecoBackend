@@ -55,7 +55,6 @@ else
                 return;
             State = state.User;
 
-            materialService.AddContext(applicationContext);
             var material = await materialService.GetMaterial(id, hostingEnvironment.WebRootPath);
             if (material != null)
                 MaterialResponse = material;

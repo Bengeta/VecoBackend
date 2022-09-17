@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using VecoBackend.Data;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Requests;
 using VecoBackend.Responses;
@@ -19,36 +20,11 @@ namespace VecoBackend.Controllers;
 [Authorize]
 public class UserController : BaseController
 {
-    private UserService _userService;
-    private JwtSettings _options;
+    private IUserService _userService;
 
-    public UserController(UserService userService, ApplicationContext applicationContext,
-        IOptions<JwtSettings> options)
+    public UserController(IUserService userService)
     {
         _userService = userService;
-        userService.AddContext(applicationContext);
-        _options = options.Value;
-        userService.AddJwtSettings(_options);
-    }
-
-    [HttpGet("token")]
-    [AllowAnonymous]
-    public string GetToken()
-    {
-        List<Claim> claims = new List<Claim>();
-        claims.Add(new Claim(ClaimTypes.Name, "admin"));
-        claims.Add(new Claim(ClaimTypes.Role, "admin"));
-
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
-
-        var token = new JwtSecurityToken(
-            issuer: _options.Issuer,
-            audience: _options.Audience,
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
-        );
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     [AllowAnonymous]

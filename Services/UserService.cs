@@ -2,26 +2,27 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using VecoBackend.Data;
 using VecoBackend.Enums;
+using VecoBackend.Interfaces;
 using VecoBackend.Models;
 using VecoBackend.Responses;
 using VecoBackend.Utils;
 
 namespace VecoBackend.Services;
 
-public class UserService
+public class UserService:IUserService
 {
     private ApplicationContext context;
     private JwtSettings _options;
 
-
-    public void AddContext(ApplicationContext applicationContext)
+    public UserService(ApplicationContext context,IOptions<JwtSettings> options)
     {
-        context = applicationContext;
+        this.context = context;
+        _options = options.Value;
     }
-
     public void AddJwtSettings(JwtSettings _options)
     {
         this._options = _options;
