@@ -28,7 +28,6 @@ else
     @if (id == -1)
     {
         <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
-        
     }
     else
     {
@@ -50,6 +49,7 @@ else
         private List<int> _images;
         private MaterialResponse MaterialResponse { get; set; }
         private ClaimsPrincipal State { get; set; }
+        private bool isPictureChanged = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -69,25 +69,61 @@ else
 
         private async Task UpdateMaterial()
         {
-        //await materialService.UpdateMaterial(MakeMaterialRequest(MaterialResponse));
+            if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse),isPictureChanged))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно изменен");
+                NavigationManager.NavigateTo("/Materials");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка изменения материала");
+            }
         }
 
         private async Task CreateMaterial()
         {
-            await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse));
-            NavigationManager.NavigateTo("/Materials");
-        }
-        
-        private async Task DeleteMaterial()
-        {
-            await materialService.DeleteMaterial(id);
-            NavigationManager.NavigateTo("/Materials");
+            if (await materialService.CreateMaterial(MakeMaterialCreateRequest(MaterialResponse)))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно создан");
+                NavigationManager.NavigateTo("/Materials");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка при создании материала");
+            }
         }
 
-        private MaterialCreateRequest MakeMaterialRequest(MaterialResponse materialResponse)
+        private async Task DeleteMaterial()
         {
-            MaterialCreateRequest materialCreateRequest = new MaterialCreateRequest();
+            if (await materialService.DeleteMaterial(id))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно удален");
+                NavigationManager.NavigateTo("/Materials");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка удаления материала");
+            }
+        }
+
+        private MaterialCreateRequest MakeMaterialCreateRequest(MaterialResponse materialResponse)
+        {
+            var materialCreateRequest = new MaterialCreateRequest();
             DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
+            materialCreateRequest.Author = materialResponse.Author;
+            materialCreateRequest.Title = materialResponse.Title;
+            materialCreateRequest.Description = materialResponse.Description;
+            materialCreateRequest.Category = materialResponse.Category;
+            materialCreateRequest.Images = _images;
+            return materialCreateRequest;
+        }
+
+        private MaterialUpdateRequest MakeMaterialUpdateRequest(MaterialResponse materialResponse)
+        {
+            var materialCreateRequest = new MaterialUpdateRequest();
+            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            materialCreateRequest.Id = id;
             materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
             materialCreateRequest.Author = materialResponse.Author;
             materialCreateRequest.Title = materialResponse.Title;
@@ -100,6 +136,7 @@ else
         private async Task UploadImage(InputFileChangeEventArgs e)
         {
             var files = e.GetMultipleFiles();
+            isPictureChanged = true;
             var token = State.Identities.First().Claims.ToList()[1].Value;
             await _imageService.DeleteImageMaterials(token);
             _images.Clear();

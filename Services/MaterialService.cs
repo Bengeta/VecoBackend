@@ -54,14 +54,37 @@ public class MaterialService : IMaterialService
         }
     }
 
-    public async Task<bool> UpdateMaterial(MaterialUpdateRequest material)
+    public async Task<bool> UpdateMaterial(MaterialUpdateRequest material, bool isPictureChanged)
     {
         try
         {
             var materialToUpdate = await _context.MaterialModels.FirstOrDefaultAsync(x => x.Id == material.Id);
             if (materialToUpdate == null)
                 return false;
+            if (isPictureChanged)
+            {
+                var images = await (from MaterialImage in _context.MaterialImageModels
+                    join image in _context.ImageStorageModels on MaterialImage.ImageId equals image.id
+                    where MaterialImage.MaterialId == material.Id
+                    select image).ToListAsync();
 
+                foreach (var image in images)
+                {
+                    _context.ImageStorageModels.Remove(image);
+                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.imagePath);
+                    if (File.Exists(filePath))
+                        File.Delete(filePath);
+                }
+
+                foreach (var image in material.Images)
+                {
+                    var newImage = new MaterialImageModel()
+                    {
+                        MaterialId = material.Id,
+                        ImageId = image
+                    };
+                }
+            }
 
             materialToUpdate.Title = material.Title;
             materialToUpdate.Description = material.Description;

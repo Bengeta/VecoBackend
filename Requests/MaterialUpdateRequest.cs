@@ -11,4 +11,5 @@ public class MaterialUpdateRequest
     public DateTime Date { get; set; }
     public bool IsSeen { get; set; }
     public MaterialCategory Category { get; set; }
+    public List<int> Images { get; set; }
 }
