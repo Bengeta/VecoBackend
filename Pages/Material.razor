@@ -1,4 +1,5 @@
 @page "/Material/{id:int}"
+@using VecoBackend.Enums
 
 <h3>Material</h3>
 
@@ -12,11 +13,6 @@ else
 {
     <label for="fname">Автор:</label>
     <input type="text" @bind="@MaterialResponse.Author" @bind:event="oninput" placeholder="@MaterialResponse.Author" id="fname" name="fname"><br><br>
-    <form action="/action_page.php">
-        <label for="img">Выберите фото автора:</label>
-        <input type="file" id="img" name="img" accept="image/*">
-        <input type="submit">
-    </form>
     <label for="lname">Заголовок:</label>
     <input type="text" @bind="@MaterialResponse.Title" @bind:event="oninput" placeholder="@MaterialResponse.Title" id="lname" name="lname"><br><br>
     <label for="lname">Дата Создания:</label>
@@ -26,13 +22,19 @@ else
     <label for="lname">Категория:</label>
     <input type="text" @bind="@MaterialResponse.Category" @bind:event="oninput" placeholder="@MaterialResponse.Category" id="lname" name="lname"><br><br>
 
-    @if (id != -1)
+    <br/>
+    <label for="fname">Фотографии:</label>
+    <InputFile multiple OnChange="UploadImage" class="form-control"/>
+    @if (id == -1)
     {
         <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+        
     }
     else
     {
         <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
+        <br/>
+        <button type="submit" class="btn btn-danger" @onclick="DeleteMaterial">Удалить</button>
     }
 
     }
@@ -45,7 +47,8 @@ else
         [Parameter]
         public int id { get; set; }
 
-        private MaterialResponse MaterialResponse = new MaterialResponse();
+        private List<int> _images;
+        private MaterialResponse MaterialResponse { get; set; }
         private ClaimsPrincipal State { get; set; }
 
         protected override async Task OnInitializedAsync()
@@ -55,6 +58,8 @@ else
                 return;
             State = state.User;
 
+            MaterialResponse = new MaterialResponse();
+            _images = new List<int>();
             var material = await materialService.GetMaterial(id, hostingEnvironment.WebRootPath);
             if (material != null)
                 MaterialResponse = material;
@@ -64,12 +69,19 @@ else
 
         private async Task UpdateMaterial()
         {
-        //   await materialService.UpdateMaterial(MaterialResponse, hostingEnvironment.WebRootPath);
+        //await materialService.UpdateMaterial(MakeMaterialRequest(MaterialResponse));
         }
 
         private async Task CreateMaterial()
         {
-        // await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse), hostingEnvironment.WebRootPath);
+            await materialService.CreateMaterial(MakeMaterialRequest(MaterialResponse));
+            NavigationManager.NavigateTo("/Materials");
+        }
+        
+        private async Task DeleteMaterial()
+        {
+            await materialService.DeleteMaterial(id);
+            NavigationManager.NavigateTo("/Materials");
         }
 
         private MaterialCreateRequest MakeMaterialRequest(MaterialResponse materialResponse)
@@ -81,13 +93,24 @@ else
             materialCreateRequest.Title = materialResponse.Title;
             materialCreateRequest.Description = materialResponse.Description;
             materialCreateRequest.Category = materialResponse.Category;
+            materialCreateRequest.Images = _images;
             return materialCreateRequest;
         }
 
-        /*private async Task<int> UploadImage()
+        private async Task UploadImage(InputFileChangeEventArgs e)
         {
-            
-        }*/
+            var files = e.GetMultipleFiles();
+            var token = State.Identities.First().Claims.ToList()[1].Value;
+            await _imageService.DeleteImageMaterials(token);
+            _images.Clear();
+            foreach (var file in files)
+            {
+                var res = await _imageService.SaveImage(file, SaveImageType.Box, token);
+                if (res.ResultCode == ResultCode.Success)
+                    _images.Add(res.Data);
+            }
+        }
 
     }
+
     

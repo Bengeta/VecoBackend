@@ -9,7 +9,7 @@ using VecoBackend.Utils;
 
 namespace VecoBackend.Services;
 
-public class MaterialService:IMaterialService
+public class MaterialService : IMaterialService
 {
     private ApplicationContext _context;
     private readonly IWebHostEnvironment _hostingEnvironment;
@@ -33,7 +33,17 @@ public class MaterialService:IMaterialService
                 IsSeen = material.IsSeen,
                 Category = material.Category,
             };
-            await _context.MaterialModels.AddAsync(newMaterial);
+            _context.MaterialModels.Add(newMaterial);
+            await _context.SaveChangesAsync();
+            foreach (var image in material.Images)
+            {
+                var newImage = new MaterialImageModel()
+                {
+                    MaterialId = newMaterial.Id,
+                    ImageId = image
+                };
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
@@ -50,9 +60,8 @@ public class MaterialService:IMaterialService
         {
             var materialToUpdate = await _context.MaterialModels.FirstOrDefaultAsync(x => x.Id == material.Id);
             if (materialToUpdate == null)
-            {
                 return false;
-            }
+
 
             materialToUpdate.Title = material.Title;
             materialToUpdate.Description = material.Description;
@@ -75,9 +84,39 @@ public class MaterialService:IMaterialService
     {
         try
         {
-            var material = await _context.MaterialModels.FirstOrDefaultAsync(x => x.Id == id);
-            if (material == null) return false;
-            _context.MaterialModels.Remove(material);
+            var res = await (from material in _context.MaterialModels
+                    join materialImage in _context.MaterialImageModels on material.Id equals materialImage.MaterialId
+                        into jb
+                    from materialImage in jb.DefaultIfEmpty()
+                    join image in _context.ImageStorageModels on materialImage.ImageId equals image.id
+                        into jb2
+                    from image in jb2.DefaultIfEmpty()
+                    where material.Id == id
+                    select new DeleteMaterialResponse()
+                    {
+                        materialId = material.Id,
+                        imageId = image.id,
+                        imagePath = image.imagePath,
+                        materialImageId = materialImage.Id
+                    }
+                ).ToListAsync();
+            if (res.Count == 0)
+                return false;
+
+            _context.MaterialModels.Remove(new MaterialModel() {Id = res[0].materialId});
+            if (res[0].imageId != null)
+                foreach (var item in res)
+                {
+                    _context.ImageStorageModels.Remove(new ImageStorageModel() {id = (int) item.imageId});
+
+                    if (item.imagePath != null)
+                    {
+                        var filePath = Path.Combine(_hostingEnvironment.WebRootPath, item.imagePath);
+                        if (File.Exists(filePath))
+                            File.Delete(filePath);
+                    }
+                }
+
             await _context.SaveChangesAsync();
             return true;
         }
@@ -87,27 +126,31 @@ public class MaterialService:IMaterialService
             return false;
         }
     }
-    
 
-    public async Task<MaterialResponse> GetMaterial(int id,string baseUrl)
+
+    public async Task<MaterialResponse> GetMaterial(int id, string baseUrl)
     {
         try
         {
             var Material = await (from material in _context.MaterialModels
                 join materialImage in _context.MaterialImageModels on material.Id equals materialImage.MaterialId
+                    into jb
+                from materialImage in jb.DefaultIfEmpty()
                 join image in _context.ImageStorageModels on materialImage.ImageId equals image.id
+                    into jb2
+                from image in jb2.DefaultIfEmpty()
                 where material.IsSeen == true && material.Id == id
                 orderby material.Id
-                select new
+                select new GetMaterialsResponseModel()
                 {
-                    material.Id,
-                    material.Title,
-                    material.Description,
-                    material.Author,
-                    material.Date,
-                    material.Category,
-                    image.imagePath,
-                    image.imageType
+                    Id = material.Id,
+                    Title = material.Title,
+                    Description = material.Description,
+                    Author = material.Author,
+                    Date = material.Date,
+                    Category = material.Category,
+                    imagePath = image.imagePath,
+                    imageType = image.imageType
                 }).ToListAsync();
             var ans = new MaterialResponse()
             {
@@ -117,7 +160,11 @@ public class MaterialService:IMaterialService
                 Author = Material[0].Author,
                 Date = Converter.ToUnixTime(Material[0].Date),
                 Category = Material[0].Category,
-                imagePaths = Material.Select(x => Path.Combine(baseUrl, x.imagePath)).ToList(),
+                imagePaths = Material.Select(x =>
+                {
+                    if (x.imagePath != null) return Path.Combine(baseUrl, x.imagePath);
+                    return null;
+                }).ToList(),
                 imageTypes = Material.Select(x => x.imageType).ToList()
             };
 
@@ -130,35 +177,34 @@ public class MaterialService:IMaterialService
         }
     }
 
-    public async Task<PaginatedListModel<MaterialResponse>> GetMaterials(int page,int pageSize,string baseUrl)
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterials(int page, int pageSize, string baseUrl)
     {
         try
         {
             var materials = await (from material in _context.MaterialModels
-                join materialImage in _context.MaterialImageModels on material.Id equals materialImage.MaterialId
-                join Image in _context.ImageStorageModels on materialImage.ImageId equals Image.id
+                join materialImage in _context.MaterialImageModels on material.Id equals materialImage.MaterialId into
+                    gj
+                from subMaterialImage in gj.DefaultIfEmpty()
+                join Image in _context.ImageStorageModels on subMaterialImage.ImageId equals Image.id into gj2
+                from subMaterialImage2 in gj2.DefaultIfEmpty()
                 where material.IsSeen == true
                 orderby material.Id
-                select new
+                select new GetMaterialsResponseModel
                 {
-                    material.Id,
-                    material.Title,
-                    material.Description,
-                    material.Author,
-                    material.Date,
-                    material.Category,
-                    Image.imagePath,
-                    Image.imageType
+                    Id = material.Id,
+                    Title = material.Title,
+                    Description = material.Description,
+                    Author = material.Author,
+                    Date = material.Date,
+                    Category = material.Category,
+                    imagePath = subMaterialImage2.imagePath,
+                    imageType = subMaterialImage2.imageType
                 }).ToListAsync();
             var list = new List<MaterialResponse>();
             var prevId = 0;
             foreach (var material in materials)
-                if (material.Id == prevId)
-                {
-                    list[^1].imagePaths.Add(Path.Combine(baseUrl, material.imagePath));
-                    list[^1].imageTypes.Add(material.imageType);
-                }
-                else
+            {
+                if (material.Id != prevId)
                 {
                     list.Add(new MaterialResponse()
                     {
@@ -168,14 +214,21 @@ public class MaterialService:IMaterialService
                         Author = material.Author,
                         Date = Converter.ToUnixTime(material.Date),
                         Category = material.Category,
-                        imagePaths = new List<string>()
-                            {Path.Combine(baseUrl, material.imagePath)},
-                        imageTypes = new List<ImageType>() {material.imageType}
+                        imagePaths = new List<string>(),
+                        imageTypes = new List<ImageType?>()
                     });
+
                     prevId = material.Id;
                 }
 
-            return GetPagedMaterials(list, page,pageSize);
+                if (material.imagePath != null)
+                {
+                    list[^1].imagePaths.Add(Path.Combine(baseUrl, material.imagePath));
+                    list[^1].imageTypes.Add((ImageType) material.imageType);
+                }
+            }
+
+            return GetPagedMaterials(list, page, pageSize);
         }
         catch (Exception e)
         {
@@ -184,7 +237,8 @@ public class MaterialService:IMaterialService
         }
     }
 
-    public async Task<PaginatedListModel<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category,int page,int pageSize,string baseUrl)
+    public async Task<PaginatedListModel<MaterialResponse>> GetMaterialsByCategory(MaterialCategory category, int page,
+        int pageSize, string baseUrl)
     {
         try
         {
@@ -224,12 +278,12 @@ public class MaterialService:IMaterialService
                         Category = material.Category,
                         imagePaths = new List<string>()
                             {Path.Combine(baseUrl, material.imagePath)},
-                        imageTypes = new List<ImageType>() {material.imageType}
+                        imageTypes = new List<ImageType?>() {material.imageType}
                     });
                     prevId = material.Id;
                 }
 
-            return GetPagedMaterials(list, page,pageSize);
+            return GetPagedMaterials(list, page, pageSize);
         }
         catch (Exception e)
         {
@@ -238,7 +292,8 @@ public class MaterialService:IMaterialService
         }
     }
 
-    private PaginatedListModel<MaterialResponse> GetPagedMaterials(List<MaterialResponse> materials, int page,int pagesize)
+    private PaginatedListModel<MaterialResponse> GetPagedMaterials(List<MaterialResponse> materials, int page,
+        int pagesize)
     {
         var answer = PagedList<MaterialResponse>.ToPagedList(materials, page, pagesize);
         return new PaginatedListModel<MaterialResponse>()

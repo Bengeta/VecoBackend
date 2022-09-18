@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
@@ -12,7 +13,7 @@ using VecoBackend.Responses;
 
 namespace VecoBackend.Services;
 
-public class ImageService:IImageService
+public class ImageService : IImageService
 {
     private readonly IEnumerable<IImageProfile> _imageProfiles;
     private readonly IWebHostEnvironment _hostingEnvironment;
@@ -60,10 +61,10 @@ public class ImageService:IImageService
             } while (File.Exists(filePath));
 
             image.Save(filePath, new WebpEncoder());
-            
+
 
             var fileUrl = Path.Combine(imageProfile.Folder, fileName);
-            var imgId = await SaveImageToDb(fileUrl, token);
+            var imgId = await SaveImageToDb(fileUrl, token, ImageType.Task);
             if (imgId > -1)
                 return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
             return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
@@ -122,7 +123,7 @@ public class ImageService:IImageService
                     join task in _context.TaskModels on userTask.TaskId equals task.Id
                     join imageTask in _context.TaskImageModels on userTask.Id equals imageTask.UserTaskId
                     join image in _context.ImageStorageModels on imageTask.imageId equals image.id
-                    where  userTask.Id == userTaskId
+                    where userTask.Id == userTaskId
                     select image).ToListAsync();
             var imageTasks =
                 await (from imageTask in _context.TaskImageModels
@@ -268,9 +269,25 @@ public class ImageService:IImageService
         throw new ImageProcessingException();
     }
 
+    private void ValidateExtension(IBrowserFile file, IImageProfile imageProfile)
+    {
+        var fileExtension = Path.GetExtension(file.Name);
+
+        if (imageProfile.AllowedExtensions.Any(ext => ext == fileExtension.ToLower()))
+            return;
+
+        throw new ImageProcessingException();
+    }
+
     private void ValidateFileSize(IFormFile file, IImageProfile imageProfile)
     {
         if (file.Length > imageProfile.MaxSizeBytes)
+            throw new ImageProcessingException();
+    }
+
+    private void ValidateFileSize(IBrowserFile file, IImageProfile imageProfile)
+    {
+        if (file.Size > imageProfile.MaxSizeBytes)
             throw new ImageProcessingException();
     }
 
@@ -286,6 +303,15 @@ public class ImageService:IImageService
         var fileName = Guid.NewGuid().ToString();
 
         return $"{fileName}{fileExtension}";
+    }
+
+    private string GenerateFileName(IBrowserFile file)
+    {
+        var fileExtension = Path.GetExtension(file.Name);
+        var guidPart = Guid.NewGuid().ToString();
+        var fileName = Path.GetFileName(file.Name) + " ";
+
+        return $"{fileName}{guidPart}{fileExtension}";
     }
 
     private void Resize(Image image, IImageProfile imageProfile)
@@ -316,7 +342,7 @@ public class ImageService:IImageService
     }
 
 
-    private async Task<int> SaveImageToDb(string filePath, string token)
+    private async Task<int> SaveImageToDb(string filePath, string token, ImageType imageType)
     {
         try
         {
@@ -326,8 +352,7 @@ public class ImageService:IImageService
                 userId = user.id,
                 UserModel = user,
                 imagePath = filePath,
-                imageType = ImageType.Task,
-                
+                imageType = imageType
             };
             _context.ImageStorageModels.Add(image);
             await _context.SaveChangesAsync();
@@ -337,6 +362,78 @@ public class ImageService:IImageService
         {
             Console.WriteLine(e);
             return -1;
+        }
+    }
+
+    public async Task<ResponseModel<int>> SaveImage(IBrowserFile file, SaveImageType imageType, string token)
+    {
+        try
+        {
+            var imageProfile = _imageProfiles.FirstOrDefault(profile =>
+                profile.ImageType == imageType);
+
+            if (imageProfile == null)
+                return new ResponseModel<int> {ResultCode = ResultCode.Failed};
+
+            ValidateExtension(file, imageProfile);
+            ValidateFileSize(file, imageProfile);
+
+            var image = await Image.LoadAsync(file.OpenReadStream());
+
+
+            var folderPath = Path.Combine(_hostingEnvironment.WebRootPath, imageProfile.Folder);
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            string filePath;
+            string fileName;
+
+            do
+            {
+                fileName = GenerateFileName(file);
+                filePath = Path.Combine(folderPath, fileName);
+            } while (File.Exists(filePath));
+
+            image.Save(filePath, new WebpEncoder());
+
+
+            var fileUrl = Path.Combine(imageProfile.Folder, fileName);
+            var imgId = await SaveImageToDb(fileUrl, token, ImageType.Material);
+            if (imgId > -1)
+                return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
+            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
+        }
+    }
+
+    public async Task DeleteImageMaterials(string token)
+    {
+        try
+        {
+            var images = await (from image in _context.ImageStorageModels
+                join user in _context.UserModels on image.userId equals user.id
+                where user.token == token && image.imageType == ImageType.Material && !image.isUsed
+                select image).ToListAsync();
+
+            foreach (var image in images)
+            {
+                _context.ImageStorageModels.Remove(image);
+
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, image.imagePath);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 }

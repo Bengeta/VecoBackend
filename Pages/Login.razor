@@ -46,15 +46,14 @@
             var user = await userService.GetUser(tokenResponse.Data);
             if(!user.Data.isAdmin)
                 return;
-            var customAuthStateProvider = (CustomAuthenticationStateProvider) AuthenticationStateProvider;
-            await customAuthStateProvider.UpdateAutheticationSession(
+            await AuthenticationStateProvider.UpdateAutheticationSession(
                 new UserSession
                 {
                     UserName = user.Data.name,
                     Token = tokenResponse.Data,
                     Role = user.Data.isAdmin ? "Admin" : "User"
                 });
-            await customAuthStateProvider.GetAuthenticationStateAsync();
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
             NavigationManager.NavigateTo("/Materials", true);
         }
 

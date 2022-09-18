@@ -1,15 +1,15 @@
 using VecoBackend.Enums;
 
-namespace VecoBackend.Requests;
+namespace VecoBackend.Models;
 
-public class MaterialCreateRequest
+public class GetMaterialsResponseModel
 {
     public int Id { get; set; }
-    public string Author { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
+    public string Author { get; set; }
     public DateTime Date { get; set; }
-    public bool IsSeen { get; set; }
+    public string? imagePath { get; set; }
     public MaterialCategory Category { get; set; }
-    public  List<int> Images { get; set; }
+    public ImageType? imageType { get; set; }
 }
