@@ -151,7 +151,7 @@ public class MaterialService : IMaterialService
     }
 
 
-    public async Task<MaterialResponse> GetMaterial(int id, string baseUrl)
+    public async Task<MaterialResponse> GetMaterial(int id, string baseUrl = "")
     {
         try
         {

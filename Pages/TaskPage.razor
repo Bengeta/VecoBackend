@@ -10,15 +10,31 @@
 else
 {
     <label for="fname">Заголовок:</label>
-    <input type="text" @bind="@task.Title" @bind:event="oninput" placeholder="@task.Title" id="fname" name="fname"><br><br>
+    <input type="text" rows="100" @bind="@task.Title" @bind:event="oninput" placeholder="@task.Title" id="fname" name="fname"><br><br>
     <label for="lname">Очки:</label>
     <input type="text" @bind="@task.Points" @bind:event="oninput" placeholder="@task.Points" id="lname" name="lname"><br><br>
     <label for="lname">Дедлайн:</label>
-    <input type="Date" @bind="@task.Deadline" @bind:event="oninput" placeholder="@task.Deadline" id="lname" name="lname"><br><br>
+    <input type="datetime-local" @bind="@deadline" @bind:event="oninput" placeholder="@deadline" id="lname" name="lname"><br><br>
     <label for="lname">Описание:</label>
     <textarea rows="30" cols="100" @bind="@task.Description" @bind:event="oninput"  placeholder=@task.Description></textarea><br><br>
-    <label for="lname">Видимость:</label>
-    <input type="text" @bind="@task.IsSeen" @bind:event="oninput" placeholder="@task.IsSeen" id="lname" name="lname"><br><br>
+    <label for="lname">Сделать видимым пользователям:</label>
+    @task.IsSeen
+    <label for="lname">Тип Задания:</label>
+    <select @bind="@task.Type" @bind:event="oninput">
+        @foreach (var category in Types)
+        {
+            <option value="@category">@category</option>
+        }
+    </select><br><br>
+    
+    @if (task.IsSeen)
+    {
+        <button type="submit" class="btn btn-danger" @onclick="ChangeTaskVisibility">Скрыть задание</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary" @onclick="ChangeTaskVisibility">Показать задание</button>
+    }<br><br>
 
     @if (id == -1)
     {
@@ -40,6 +56,8 @@ else
 
         private GetTaskResponse task = new GetTaskResponse();
         private ClaimsPrincipal State { get; set; }
+        private DateTime deadline { get; set; }
+        private List<TaskType> Types { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -48,9 +66,13 @@ else
                 return;
             State = state.User;
 
+            Types = Enum.GetValues(typeof(TaskType)).Cast<TaskType>().ToList();
             var task_ = await taskService.GetTaskById(id);
             if (task_ != null)
+            {
                 task = task_;
+                deadline = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(task_.Deadline).ToLocalTime();
+            }
         }
 
         private async Task UpdateMaterial()
@@ -95,8 +117,7 @@ else
         private AddTaskResponse MakeAddTaskResponse(GetTaskResponse taskResponse)
         {
             var addTaskResponse = new AddTaskResponse();
-            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            addTaskResponse.Deadline = start.AddMilliseconds(taskResponse.Deadline).ToLocalTime();
+            addTaskResponse.Deadline = deadline;
             addTaskResponse.Status = taskResponse.Status;
             addTaskResponse.Type = taskResponse.Type;
             addTaskResponse.Title = taskResponse.Title;
@@ -108,8 +129,7 @@ else
         private ChangeTaskResponse MakeChangeTaskResponse(GetTaskResponse taskResponse)
         {
             var changeTaskResponse = new ChangeTaskResponse();
-            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            changeTaskResponse.Deadline = start.AddMilliseconds(taskResponse.Deadline).ToLocalTime();
+            changeTaskResponse.Deadline = deadline;
             changeTaskResponse.Status = taskResponse.Status;
             changeTaskResponse.Id = taskResponse.Id;
             changeTaskResponse.Type = taskResponse.Type;
@@ -117,6 +137,30 @@ else
             changeTaskResponse.Description = taskResponse.Description;
             changeTaskResponse.Points = taskResponse.Points;
             return changeTaskResponse;
+        }
+        private DateTime AddDeadline(TaskType type)
+        {
+            switch (type)
+            {
+                case TaskType.Day:
+                    return DateTime.Now.AddDays(1);
+                case TaskType.Week:
+                    return DateTime.Now.AddDays(7);
+                case TaskType.Month:
+                    return DateTime.Now.AddMonths(1);
+                default:
+                    return DateTime.Now;
+            }
+        }
+        private async Task ChangeTaskVisibility()
+        {
+            if(await taskService.ChangeTaskVisibility(task.Id, !task.IsSeen))
+            {
+                task.IsSeen = !task.IsSeen;
+                await jsRuntime.InvokeVoidAsync("alert", "Задание успешно изменено");
+                return;
+            }
+            await jsRuntime.InvokeVoidAsync("alert", "Ошибка изменения задания");
         }
 
     }

@@ -3,147 +3,174 @@
 <h3>Material</h3>
 
 @if (State != null && State.Identity.Name != "Anonymous")
-{
-@if (MaterialResponse == null)
-{
-    <tr>Loading Data ...</tr>
-}
-else
-{
-    <label for="fname">Автор:</label>
-    <input type="text" @bind="@MaterialResponse.Author" @bind:event="oninput" placeholder="@MaterialResponse.Author" id="fname" name="fname"><br><br>
-    <label for="lname">Заголовок:</label>
-    <input type="text" @bind="@MaterialResponse.Title" @bind:event="oninput" placeholder="@MaterialResponse.Title" id="lname" name="lname"><br><br>
-    <label for="lname">Дата Создания:</label>
-    <input type="Date" @bind="@MaterialResponse.Date" @bind:event="oninput" placeholder="@MaterialResponse.Date" id="lname" name="lname"><br><br>
-    <label for="lname">Текст:</label>
-    <textarea rows="30" cols="100" @bind="@MaterialResponse.Description" @bind:event="oninput"  placeholder=@MaterialResponse.Description></textarea><br><br>
-    <label for="lname">Категория:</label>
-    <input type="text" @bind="@MaterialResponse.Category" @bind:event="oninput" placeholder="@MaterialResponse.Category" id="lname" name="lname"><br><br>
-
-    <br/>
-    <label for="fname">Фотографии:</label>
-    <InputFile multiple OnChange="UploadImage" class="form-control"/>
-    @if (id == -1)
     {
-        <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+    @if (MaterialResponse == null)
+    {
+        <tr>Loading Data ...</tr>
     }
     else
     {
-        <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
-        <br/>
-        <button type="submit" class="btn btn-danger" @onclick="DeleteMaterial">Удалить</button>
+    <label for="fname">Автор:</label>
+
+
+
+<input type="text" @bind="@MaterialResponse.Author" @bind:event="oninput" placeholder="@MaterialResponse.Author" id="fname" name="fname"><br><br>
+<label for="lname">Заголовок:</label>
+<input type="text" @bind="@MaterialResponse.Title" @bind:event="oninput" placeholder="@MaterialResponse.Title" id="lname" name="lname"><br><br>
+<label for="lname">Дата Создания:</label>
+<input type="datetime-local" @bind="Date" @bind:event="oninput" placeholder="@Date" id="lname" name="lname"><br><br>
+<label for="lname">Текст:</label>
+<textarea rows="30" cols="100" @bind="@MaterialResponse.Description" @bind:event="oninput"  placeholder=@MaterialResponse.Description></textarea><br><br>
+<label for="lname">Категория:</label>
+<select @bind="@MaterialResponse.Category" @bind:event="oninput" id="lname" name="lname">
+    @foreach (var category in Categories)
+    {
+        <option value="@category">@category</option>
     }
-    }}
+</select>
 
 
-    @code {
+<br/>
+<label for="fname">Фотографии:</label>
+<InputFile accept=".jpg, .jpeg, .png, .gif , .webp" multiple OnChange="UploadImage" class="form-control"/>
 
-        [Parameter]
-        public int id { get; set; }
+@foreach (var image in _images)
+{
+    <tr>
+        <td>
+            @image.ImageUrl.Split("/").Last()
+        </td>
+        <td>
+            <img src=@image.ImageUrl alt="Flowers in Chania" width="300" height="300">
+        </td>
+    </tr>
+}
+@if (id == -1)
+{
+    <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+}
+else
+{
+    <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
+    <br/>
+    <button type="submit" class="btn btn-danger" @onclick="DeleteMaterial">Удалить</button>
+}
+}}
 
-        private List<int> _images;
-        private MaterialResponse MaterialResponse { get; set; }
-        private ClaimsPrincipal State { get; set; }
-        private bool isPictureChanged = false;
+@code {
 
-        protected override async Task OnInitializedAsync()
-        {
-            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            if (!state.User.Identity.IsAuthenticated)
-                return;
-            State = state.User;
-
-            MaterialResponse = new MaterialResponse();
-            _images = new List<int>();
-            var material = await materialService.GetMaterial(id, hostingEnvironment.WebRootPath);
-            if (material != null)
-                MaterialResponse = material;
-            else
-                MaterialResponse.Id = -1;
-        }
-
-        private async Task UpdateMaterial()
-        {
-            if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse), isPictureChanged))
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно изменен");
-                NavigationManager.NavigateTo("/Materials");
-            }
-            else
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Ошибка изменения материала");
-            }
-        }
-
-        private async Task CreateMaterial()
-        {
-            if (await materialService.CreateMaterial(MakeMaterialCreateRequest(MaterialResponse)))
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно создан");
-                NavigationManager.NavigateTo("/Materials");
-            }
-            else
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Ошибка при создании материала");
-            }
-        }
-
-        private async Task DeleteMaterial()
-        {
-            if (await materialService.DeleteMaterial(id))
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Материал успешно удален");
-                NavigationManager.NavigateTo("/Materials");
-            }
-            else
-            {
-                await jsRuntime.InvokeVoidAsync("alert", "Ошибка удаления материала");
-            }
-        }
-
-        private MaterialCreateRequest MakeMaterialCreateRequest(MaterialResponse materialResponse)
-        {
-            var materialCreateRequest = new MaterialCreateRequest();
-            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
-            materialCreateRequest.Author = materialResponse.Author;
-            materialCreateRequest.Title = materialResponse.Title;
-            materialCreateRequest.Description = materialResponse.Description;
-            materialCreateRequest.Category = materialResponse.Category;
-            materialCreateRequest.Images = _images;
-            return materialCreateRequest;
-        }
-
-        private MaterialUpdateRequest MakeMaterialUpdateRequest(MaterialResponse materialResponse)
-        {
-            var materialCreateRequest = new MaterialUpdateRequest();
-            var start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            materialCreateRequest.Id = id;
-            materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
-            materialCreateRequest.Author = materialResponse.Author;
-            materialCreateRequest.Title = materialResponse.Title;
-            materialCreateRequest.Description = materialResponse.Description;
-            materialCreateRequest.Category = materialResponse.Category;
-            materialCreateRequest.Images = _images;
-            return materialCreateRequest;
-        }
-
-        private async Task UploadImage(InputFileChangeEventArgs e)
-        {
-            var files = e.GetMultipleFiles();
-            isPictureChanged = true;
-            var token = State.Identities.First().Claims.ToList()[1].Value;
-            await _imageService.DeleteImageMaterials(token);
-            _images.Clear();
-            foreach (var file in files)
-            {
-                var res = await _imageService.SaveImage(file, SaveImageType.Box, token);
-                if (res.ResultCode == ResultCode.Success)
-                    _images.Add(res.Data);
-            }
-        }
-
-    }
-
+    [Parameter]
     
+
+
+    public int id { get; set; }
+    private List<MaterialCategory> Categories { get; set; }
+
+    private DateTime Date { get; set; }
+    private List<ImageResponseModel> _images;
+    private MaterialResponse MaterialResponse { get; set; }
+    private ClaimsPrincipal State { get; set; }
+    private bool isPictureChanged = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Identity.IsAuthenticated)
+            return;
+        State = state.User;
+
+        MaterialResponse = new MaterialResponse();
+        _images = new List<ImageResponseModel>();
+        Categories = Enum.GetValues(typeof(MaterialCategory)).Cast<MaterialCategory>().ToList();
+        var material = await materialService.GetMaterial(id);
+        if (material != null)
+        {
+            MaterialResponse = material;
+            Date = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(material.Date).ToLocalTime();
+            foreach (var imagePath in material.imagePaths)
+                _images.Add(new ImageResponseModel {Id = 0, ImageUrl = imagePath});
+        }
+        else
+            MaterialResponse.Id = -1;
+    }
+
+    private async Task UpdateMaterial()
+    {
+        if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse), isPictureChanged))
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Материал успешно изменен");
+            NavigationManager.NavigateTo("/Materials");
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Ошибка изменения материала");
+        }
+    }
+
+    private async Task CreateMaterial()
+    {
+        if (await materialService.CreateMaterial(MakeMaterialCreateRequest(MaterialResponse)))
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Материал успешно создан");
+            NavigationManager.NavigateTo("/Materials");
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Ошибка при создании материала");
+        }
+    }
+
+    private async Task DeleteMaterial()
+    {
+        if (await materialService.DeleteMaterial(id))
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Материал успешно удален");
+            NavigationManager.NavigateTo("/Materials");
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Ошибка удаления материала");
+        }
+    }
+
+    private MaterialCreateRequest MakeMaterialCreateRequest(MaterialResponse materialResponse)
+    {
+        var materialCreateRequest = new MaterialCreateRequest();
+        materialCreateRequest.Date = Date;
+        materialCreateRequest.Author = materialResponse.Author;
+        materialCreateRequest.Title = materialResponse.Title;
+        materialCreateRequest.Description = materialResponse.Description;
+        materialCreateRequest.Category = materialResponse.Category;
+        materialCreateRequest.Images = _images.Select(x => x.Id).ToList();
+        ;
+        return materialCreateRequest;
+    }
+
+    private MaterialUpdateRequest MakeMaterialUpdateRequest(MaterialResponse materialResponse)
+    {
+        var materialCreateRequest = new MaterialUpdateRequest();
+        materialCreateRequest.Id = id;
+        materialCreateRequest.Date = Date;
+        materialCreateRequest.Author = materialResponse.Author;
+        materialCreateRequest.Title = materialResponse.Title;
+        materialCreateRequest.Description = materialResponse.Description;
+        materialCreateRequest.Category = materialResponse.Category;
+        materialCreateRequest.Images = _images.Select(x => x.Id).ToList();
+        return materialCreateRequest;
+    }
+
+    private async Task UploadImage(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+        isPictureChanged = true;
+        var token = State.Identities.First().Claims.ToList()[1].Value;
+        await _imageService.DeleteImageMaterials(token);
+        _images.Clear();
+        foreach (var file in files)
+        {
+            var res = await _imageService.SaveImage(file, SaveImageType.Box, token);
+            if (res.ResultCode == ResultCode.Success)
+                _images.Add(res.Data);
+        }
+    }
+    }

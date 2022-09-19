@@ -13,7 +13,7 @@ public interface ITaskService
     public Task<List<CheckTaskListResponse>> GetCheckTaskList();
     public Task<GetTaskResponse> GetTaskById(int id);
     public Task<bool> CreateTask(AddTaskResponse task);
-    public Task ChangeTaskVisibility(int taskId, bool visibility);
+    public Task<bool> ChangeTaskVisibility(int taskId, bool visibility);
     public Task<bool> DeleteTask(int taskId);
     public Task<bool> UpdateTask(ChangeTaskResponse task);
     public  Task<List<TaskModel>> GetTasksByType(TaskType type);

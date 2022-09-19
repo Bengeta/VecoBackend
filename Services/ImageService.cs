@@ -365,7 +365,7 @@ public class ImageService : IImageService
         }
     }
 
-    public async Task<ResponseModel<int>> SaveImage(IBrowserFile file, SaveImageType imageType, string token)
+    public async Task<ResponseModel<ImageResponseModel>> SaveImage(IBrowserFile file, SaveImageType imageType, string token)
     {
         try
         {
@@ -373,7 +373,7 @@ public class ImageService : IImageService
                 profile.ImageType == imageType);
 
             if (imageProfile == null)
-                return new ResponseModel<int> {ResultCode = ResultCode.Failed};
+                return new ResponseModel<ImageResponseModel> {ResultCode = ResultCode.Failed};
 
             ValidateExtension(file, imageProfile);
             ValidateFileSize(file, imageProfile);
@@ -401,12 +401,12 @@ public class ImageService : IImageService
             var fileUrl = Path.Combine(imageProfile.Folder, fileName);
             var imgId = await SaveImageToDb(fileUrl, token, ImageType.Material);
             if (imgId > -1)
-                return new ResponseModel<int>() {ResultCode = ResultCode.Success, Data = imgId};
-            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
+                return new ResponseModel<ImageResponseModel>() {ResultCode = ResultCode.Success, Data = new ImageResponseModel(){Id = imgId, ImageUrl = fileUrl}};
+            return new ResponseModel<ImageResponseModel>() {ResultCode = ResultCode.Failed};
         }
         catch (Exception e)
         {
-            return new ResponseModel<int>() {ResultCode = ResultCode.Failed};
+            return new ResponseModel<ImageResponseModel>() {ResultCode = ResultCode.Failed};
         }
     }
 

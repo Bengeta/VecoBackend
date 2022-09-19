@@ -211,18 +211,19 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task ChangeTaskVisibility(int taskId, bool visibility)
+    public async Task<bool> ChangeTaskVisibility(int taskId, bool visibility)
     {
         try
         {
             var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
             task.IsSeen = visibility;
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            return false;
         }
     }
 
