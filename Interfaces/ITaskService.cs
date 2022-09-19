@@ -12,11 +12,12 @@ public interface ITaskService
     public Task<ResponseModel<int>> ChangeTaskStatus(string token, TaskStatus newStatus, int taskId);
     public Task<List<CheckTaskListResponse>> GetCheckTaskList();
     public Task<GetTaskResponse> GetTaskById(int id);
-    public Task AddTask(AddTaskResponse task);
+    public Task<bool> CreateTask(AddTaskResponse task);
     public Task ChangeTaskVisibility(int taskId, bool visibility);
-    public Task DeleteTask(int taskId);
-    public Task ChangeTask(ChangeTaskResponse task);
+    public Task<bool> DeleteTask(int taskId);
+    public Task<bool> UpdateTask(ChangeTaskResponse task);
     public  Task<List<TaskModel>> GetTasksByType(TaskType type);
     public  Task<ResultCode> SubmitImages(List<int> imagesId, int taskId, string token);
-    
+    public Task<PagedList<TaskModel>> GetTasks(int page, int pageSize);
+
 }

@@ -1,5 +1,4 @@
 @page "/Material/{id:int}"
-@using VecoBackend.Enums
 
 <h3>Material</h3>
 
@@ -35,10 +34,7 @@ else
         <br/>
         <button type="submit" class="btn btn-danger" @onclick="DeleteMaterial">Удалить</button>
     }
-
-    }
-    }
-
+    }}
 
 
     @code {
@@ -69,7 +65,7 @@ else
 
         private async Task UpdateMaterial()
         {
-            if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse),isPictureChanged))
+            if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse), isPictureChanged))
             {
                 await jsRuntime.InvokeVoidAsync("alert", "Материал успешно изменен");
                 NavigationManager.NavigateTo("/Materials");
@@ -122,7 +118,7 @@ else
         private MaterialUpdateRequest MakeMaterialUpdateRequest(MaterialResponse materialResponse)
         {
             var materialCreateRequest = new MaterialUpdateRequest();
-            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             materialCreateRequest.Id = id;
             materialCreateRequest.Date = start.AddMilliseconds(materialResponse.Date).ToLocalTime();
             materialCreateRequest.Author = materialResponse.Author;

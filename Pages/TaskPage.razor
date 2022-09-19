@@ -1,0 +1,123 @@
+@page "/Task/{id:int}"
+<h3>TaskPage</h3>
+
+@if (State != null && State.Identity.Name != "Anonymous")
+{
+@if (task == null && id != -1)
+{
+    <tr>Loading Data ...</tr>
+}
+else
+{
+    <label for="fname">Заголовок:</label>
+    <input type="text" @bind="@task.Title" @bind:event="oninput" placeholder="@task.Title" id="fname" name="fname"><br><br>
+    <label for="lname">Очки:</label>
+    <input type="text" @bind="@task.Points" @bind:event="oninput" placeholder="@task.Points" id="lname" name="lname"><br><br>
+    <label for="lname">Дедлайн:</label>
+    <input type="Date" @bind="@task.Deadline" @bind:event="oninput" placeholder="@task.Deadline" id="lname" name="lname"><br><br>
+    <label for="lname">Описание:</label>
+    <textarea rows="30" cols="100" @bind="@task.Description" @bind:event="oninput"  placeholder=@task.Description></textarea><br><br>
+    <label for="lname">Видимость:</label>
+    <input type="text" @bind="@task.IsSeen" @bind:event="oninput" placeholder="@task.IsSeen" id="lname" name="lname"><br><br>
+
+    @if (id == -1)
+    {
+        <button type="submit" class="btn btn-primary" @onclick="CreateMaterial">Сохранить</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary" @onclick="UpdateMaterial">Изменить</button>
+        <br/>
+        <button type="submit" class="btn btn-danger" @onclick="DeleteMaterial">Удалить</button>
+    }
+    }}
+
+
+    @code {
+
+        [Parameter]
+        public int id { get; set; }
+
+        private GetTaskResponse task = new GetTaskResponse();
+        private ClaimsPrincipal State { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (!state.User.Identity.IsAuthenticated)
+                return;
+            State = state.User;
+
+            var task_ = await taskService.GetTaskById(id);
+            if (task_ != null)
+                task = task_;
+        }
+
+        private async Task UpdateMaterial()
+        {
+            if (await taskService.UpdateTask(MakeChangeTaskResponse(task)))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Задание успешно изменено");
+                NavigationManager.NavigateTo("/TaskList");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка изменения задания");
+            }
+        }
+
+        private async Task CreateMaterial()
+        {
+            if (await taskService.CreateTask(MakeAddTaskResponse(task)))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Задание успешно создано");
+                NavigationManager.NavigateTo("/TaskList");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка при создании Задания");
+            }
+        }
+
+        private async Task DeleteMaterial()
+        {
+            if (await taskService.DeleteTask(id))
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Задание успешно удалено");
+                NavigationManager.NavigateTo("/TaskList");
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "Ошибка удаления материала");
+            }
+        }
+
+        private AddTaskResponse MakeAddTaskResponse(GetTaskResponse taskResponse)
+        {
+            var addTaskResponse = new AddTaskResponse();
+            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            addTaskResponse.Deadline = start.AddMilliseconds(taskResponse.Deadline).ToLocalTime();
+            addTaskResponse.Status = taskResponse.Status;
+            addTaskResponse.Type = taskResponse.Type;
+            addTaskResponse.Title = taskResponse.Title;
+            addTaskResponse.Description = taskResponse.Description;
+            addTaskResponse.Points = taskResponse.Points;
+            return addTaskResponse;
+        }
+
+        private ChangeTaskResponse MakeChangeTaskResponse(GetTaskResponse taskResponse)
+        {
+            var changeTaskResponse = new ChangeTaskResponse();
+            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            changeTaskResponse.Deadline = start.AddMilliseconds(taskResponse.Deadline).ToLocalTime();
+            changeTaskResponse.Status = taskResponse.Status;
+            changeTaskResponse.Id = taskResponse.Id;
+            changeTaskResponse.Type = taskResponse.Type;
+            changeTaskResponse.Title = taskResponse.Title;
+            changeTaskResponse.Description = taskResponse.Description;
+            changeTaskResponse.Points = taskResponse.Points;
+            return changeTaskResponse;
+        }
+
+    }
+

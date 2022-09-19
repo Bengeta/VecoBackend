@@ -12,7 +12,7 @@ using TaskStatus = VecoBackend.Enums.TaskStatus;
 
 namespace VecoBackend.Services;
 
-public class TaskService:ITaskService
+public class TaskService : ITaskService
 {
     private ApplicationContext _context;
     private readonly IWebHostEnvironment _hostingEnvironment;
@@ -172,7 +172,22 @@ public class TaskService:ITaskService
         }
     }
 
-    public async Task AddTask(AddTaskResponse task)
+    public async Task<PagedList<TaskModel>> GetTasks(int page, int pageSize)
+    {
+        try
+        {
+            var tasks = await _context.TaskModels.ToListAsync();
+            var pagedTasks = PagedList<TaskModel>.ToPagedList(tasks, page, pageSize);
+            return pagedTasks;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+
+    public async Task<bool> CreateTask(AddTaskResponse task)
     {
         try
         {
@@ -187,11 +202,12 @@ public class TaskService:ITaskService
             };
             await _context.TaskModels.AddAsync(newTask);
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            return false;
         }
     }
 
@@ -210,22 +226,23 @@ public class TaskService:ITaskService
         }
     }
 
-    public async Task DeleteTask(int taskId)
+    public async Task<bool> DeleteTask(int taskId)
     {
         try
         {
             var task = await _context.TaskModels.Where(u => u.Id == taskId).FirstOrDefaultAsync();
             _context.TaskModels.Remove(task);
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            return false;
         }
     }
 
-    public async Task ChangeTask(ChangeTaskResponse task)
+    public async Task<bool> UpdateTask(ChangeTaskResponse task)
     {
         try
         {
@@ -236,11 +253,12 @@ public class TaskService:ITaskService
             newTask.Points = task.Points;
             newTask.Deadline = task.Deadline;
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            return false;
         }
     }
 
