@@ -39,5 +39,5 @@ jobs:
       - name: Upload artifacts
         run: |
           cp appsettings.json bin/Release/net6.0/publish/appsettings.json
-          rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/srv/veco/
+          rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p 22" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/srv/veco/
 
