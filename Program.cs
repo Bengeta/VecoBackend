@@ -109,7 +109,6 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddCoreAdmin();
 var app = builder.Build();
 
-
 if (args.Length == 0)
     SeedData(app);
 
