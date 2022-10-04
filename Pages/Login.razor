@@ -54,7 +54,7 @@
                     Role = user.Data.isAdmin ? "Admin" : "User"
                 });
             await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            NavigationManager.NavigateTo("/Materials", true);
+            NavigationManager.NavigateTo("/veco/Materials", true);
         }
 
         catch (Exception e)

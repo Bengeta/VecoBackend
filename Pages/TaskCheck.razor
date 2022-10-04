@@ -53,13 +53,13 @@
     protected async Task Accept()
     {
         await _imageService.AcceptTask(taskId);
-        NavigationManager.NavigateTo($"/TaskCheckList");
+        NavigationManager.NavigateTo($"/veco/TaskCheckList");
     }
 
     protected async Task Deny()
     {
         await _imageService.DenyTask(taskId);
-        NavigationManager.NavigateTo($"/TaskCheckList");
+        NavigationManager.NavigateTo($"/veco/TaskCheckList");
     }
 
 }

@@ -18,7 +18,7 @@
                     <a @onclick="Logout" href="javascript:void(0)">Logout</a>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="/Login">Login</a>
+                    <a href="/veco/Login">Login</a>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
@@ -34,6 +34,6 @@
     {
         var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
         await customAuthStateProvider.UpdateAutheticationSession(null);
-        NavigationManager.NavigateTo("/Login",true);
+        NavigationManager.NavigateTo("/veco/Login",true);
     }
 }

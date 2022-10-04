@@ -99,7 +99,7 @@ else
         if (await materialService.UpdateMaterial(MakeMaterialUpdateRequest(MaterialResponse), isPictureChanged))
         {
             await jsRuntime.InvokeVoidAsync("alert", "Материал успешно изменен");
-            NavigationManager.NavigateTo("/Materials");
+            NavigationManager.NavigateTo("/veco/Materials");
         }
         else
         {
@@ -112,7 +112,7 @@ else
         if (await materialService.CreateMaterial(MakeMaterialCreateRequest(MaterialResponse)))
         {
             await jsRuntime.InvokeVoidAsync("alert", "Материал успешно создан");
-            NavigationManager.NavigateTo("/Materials");
+            NavigationManager.NavigateTo("/veco/Materials");
         }
         else
         {
@@ -125,7 +125,7 @@ else
         if (await materialService.DeleteMaterial(id))
         {
             await jsRuntime.InvokeVoidAsync("alert", "Материал успешно удален");
-            NavigationManager.NavigateTo("/Materials");
+            NavigationManager.NavigateTo("/veco/Materials");
         }
         else
         {

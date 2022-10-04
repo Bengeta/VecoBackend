@@ -80,7 +80,7 @@ else
             if (await taskService.UpdateTask(MakeChangeTaskResponse(task)))
             {
                 await jsRuntime.InvokeVoidAsync("alert", "Задание успешно изменено");
-                NavigationManager.NavigateTo("/TaskList");
+                NavigationManager.NavigateTo("/veco/TaskList");
             }
             else
             {
@@ -93,7 +93,7 @@ else
             if (await taskService.CreateTask(MakeAddTaskResponse(task)))
             {
                 await jsRuntime.InvokeVoidAsync("alert", "Задание успешно создано");
-                NavigationManager.NavigateTo("/TaskList");
+                NavigationManager.NavigateTo("/veco/TaskList");
             }
             else
             {
@@ -106,7 +106,7 @@ else
             if (await taskService.DeleteTask(id))
             {
                 await jsRuntime.InvokeVoidAsync("alert", "Задание успешно удалено");
-                NavigationManager.NavigateTo("/TaskList");
+                NavigationManager.NavigateTo("/veco/TaskList");
             }
             else
             {
