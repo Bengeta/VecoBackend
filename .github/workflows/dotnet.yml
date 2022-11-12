@@ -22,7 +22,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -32,12 +32,12 @@ jobs:
           wget -O appsettings.json "$appsettings"
           
           dotnet tool install --global dotnet-ef
-          dotnet ef migrations bundle -r linux-arm64 -o bin/Release/net6.0/publish/bundle
+          dotnet ef migrations bundle -r linux-arm64 -o bin/Release/net7.0.0/publish/bundle
 
       - name: Download SSH key
         run: wget -O k.key "$keylink";chmod 400 k.key
       - name: Upload artifacts
         run: |
-          cp appsettings.json bin/Release/net6.0/publish/appsettings.json
-          rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p 22" bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/srv/veco/
+          cp appsettings.json bin/Release/net7.0.0/publish/appsettings.json
+          rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p 22" bin/Release/net7.0.0/publish/ deploy@$hostname:/home/deploy/srv/veco/
 
